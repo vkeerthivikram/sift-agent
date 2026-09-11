@@ -6,8 +6,10 @@ Run with:  uv run sift-ui
 
 from __future__ import annotations
 
+import io
 import os
 import shutil
+import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -17,9 +19,21 @@ import streamlit as st
 from sift_agent.analysis import column_summary
 from sift_agent.config import DEFAULT_MODELS, PROVIDERS, REQUIRED_ENV, get_llm
 from sift_agent.graph import run_pipeline
+from sift_agent.loader import WORKBOOK_SUFFIXES, LoadError, sheet_names
 from sift_agent.paths import unique_dir
 
 st.set_page_config(page_title="sift — auto-EDA", page_icon="mag", layout="wide")
+
+
+@st.cache_data
+def _cached_sheet_names(data: bytes, suffix: str) -> list[str]:
+    return sheet_names(io.BytesIO(data), suffix=suffix)
+
+
+def _human_size(n_bytes: int) -> str:
+    if n_bytes < 1_000_000:
+        return f"{n_bytes / 1e3:.1f} KB"
+    return f"{n_bytes / 1e6:.1f} MB"
 
 
 def _credentials_ui(provider: str) -> dict[str, str]:
@@ -64,7 +78,7 @@ def _credentials_ui(provider: str) -> dict[str, str]:
 with st.sidebar:
     st.header("sift — auto-EDA")
     st.caption(
-        "CSV in, statistical profile, charts, insights and recommendations out. Powered by LangGraph."
+        "CSV/Excel/ODS in, statistical profile, charts, insights and recommendations out. Powered by LangGraph."
     )
     provider = st.selectbox("LLM provider", PROVIDERS, index=PROVIDERS.index("none"))
     model = st.text_input(
@@ -81,16 +95,27 @@ with st.sidebar:
     st.caption(
         "Keys entered here are used for this run only — they never touch process environment."
     )
+    st.divider()
+    if st.button("Start over"):
+        for key in ("result", "out_dir", "run_settings", "preview_df"):
+            st.session_state.pop(key, None)
+        st.rerun()
 
 
 def _run_analysis(
-    uploaded, provider: str, model: str, temperature: float, env: dict[str, str]
+    uploaded,
+    sheet: str,
+    provider: str,
+    model: str,
+    temperature: float,
+    env: dict[str, str],
 ) -> None:
     stem = Path(uploaded.name).stem
     base = Path("output") / f"ui_{stem}_{datetime.now(UTC):%Y%m%d-%H%M%S}"
     out_dir = unique_dir(base)
-    csv_path = out_dir / "input.csv"
-    with open(csv_path, "wb") as f:
+    suffix = Path(uploaded.name).suffix.lower() or ".csv"
+    input_path = out_dir / f"input{suffix}"
+    with open(input_path, "wb") as f:
         shutil.copyfileobj(uploaded, f)
 
     llm = None
@@ -104,7 +129,8 @@ def _run_analysis(
             return
 
     state = {
-        "csv_path": str(csv_path),
+        "input_path": str(input_path),
+        "sheet": sheet or "",
         "output_dir": str(out_dir),
         "provider": provider,
         "model": model or "",
@@ -123,7 +149,9 @@ def _run_analysis(
             st.warning(w)
         status.update(label="Analysis complete", state="complete", expanded=False)
 
-    final.pop("df", None)
+    df = final.pop("df", None)
+    if df is not None:
+        st.session_state["preview_df"] = df.head(100)
     st.session_state["result"] = final
     st.session_state["out_dir"] = str(out_dir)
 
@@ -222,7 +250,7 @@ if uploaded is not None:
 
     st.divider()
     if st.button("Run analysis", type="primary", use_container_width=True):
-        _run_analysis(uploaded, provider, model, temperature, creds)
+        _run_analysis(uploaded, sheet, provider, model, temperature, creds)
 
 res = st.session_state.get("result")
 if res:
