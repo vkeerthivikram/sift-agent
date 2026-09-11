@@ -12,7 +12,8 @@ class ChartRef(TypedDict):
 
 class EDAState(TypedDict, total=False):
     # inputs
-    csv_path: str
+    input_path: str
+    sheet: str  # Excel/ODS sheet name or 0-based index; "" = auto (combine compatible sheets)
     output_dir: str
     provider: str
     model: str

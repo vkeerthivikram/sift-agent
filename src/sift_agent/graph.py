@@ -18,13 +18,14 @@ from langchain_core.language_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 
 from .analysis import profile_dataframe
+from .loader import LoadError, load_table
 from .report import write_report
 from .state import EDAState
 from .visualize import generate_charts
 
 logger = logging.getLogger("sift_agent.graph")
 
-MAX_CSV_BYTES = 512 * 1024 * 1024
+MAX_INPUT_BYTES = 512 * 1024 * 1024
 MAX_ROWS = 1_000_000
 LLM_MAX_ATTEMPTS = 3
 LLM_RETRY_BACKOFF_S = 2.0
@@ -336,33 +337,40 @@ def build_graph(llm: BaseChatModel | None):
     """Compile the EDA pipeline graph. LLM nodes fall back to heuristics when llm is None."""
 
     def load_data(state: EDAState) -> dict:
-        csv_path = state["csv_path"]
+        input_path = state["input_path"]
         try:
-            size = Path(csv_path).stat().st_size
+            size = Path(input_path).stat().st_size
         except OSError as exc:
-            return {"error": f"could not stat CSV '{csv_path}': {exc}"}
-        if size > MAX_CSV_BYTES:
+            return {"error": f"could not stat input '{input_path}': {exc}"}
+        if size > MAX_INPUT_BYTES:
             return {
                 "error": (
-                    f"CSV is {size / 1e6:.1f} MB; maximum supported size is "
-                    f"{MAX_CSV_BYTES / 1e6:.0f} MB"
+                    f"input is {size / 1e6:.1f} MB; maximum supported size is "
+                    f"{MAX_INPUT_BYTES / 1e6:.0f} MB"
                 )
             }
         try:
-            df = pd.read_csv(csv_path)
+            df, load_warnings = load_table(
+                Path(input_path), sheet=state.get("sheet") or None
+            )
+        except LoadError as exc:
+            return {"error": str(exc)}
         except Exception as exc:
-            return {"error": f"could not load CSV '{csv_path}': {exc}"}
+            return {"error": f"could not load '{input_path}': {exc}"}
         if df.shape[1] == 0:
-            return {"error": "CSV contains no columns"}
+            return {"error": "input contains no columns"}
         if df.shape[0] == 0:
-            return {"error": "CSV contains no data rows"}
+            return {"error": "input contains no data rows"}
         if df.shape[0] > MAX_ROWS:
             return {
                 "error": (
-                    f"CSV has {df.shape[0]:,} rows; maximum supported is {MAX_ROWS:,}"
+                    f"input has {df.shape[0]:,} rows; maximum supported is {MAX_ROWS:,}"
                 )
             }
-        return {"df": _infer_datetimes(df)}
+        result: dict = {"df": _infer_datetimes(df)}
+        if load_warnings:
+            result["warnings"] = load_warnings
+        return result
 
     def statistical_analysis(state: EDAState) -> dict:
         return {"profile": profile_dataframe(state["df"])}

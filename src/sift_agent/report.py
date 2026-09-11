@@ -29,7 +29,7 @@ def write_report(state: dict) -> str:
     )
 
     lines: list[str] = []
-    lines.append(f"# Auto-EDA report — {Path(state['csv_path']).name}")
+    lines.append(f"# Auto-EDA report — {Path(state['input_path']).name}")
     lines.append("")
     lines.append(
         f"*Generated {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')} "
