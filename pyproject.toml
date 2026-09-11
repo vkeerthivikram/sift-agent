@@ -1,0 +1,44 @@
+[project]
+name = "sift-agent"
+version = "0.1.0"
+description = "Auto-EDA agent: CSV in, statistical profile, charts, insights and recommendations out. Powered by LangGraph."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.2",
+    "langchain-core>=0.3",
+    "langchain-openai>=0.3",
+    "langchain-anthropic>=0.3",
+    "langchain-aws>=0.2",
+    "pandas>=2.1",
+    "numpy>=1.26",
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "typer>=0.12",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+ui = ["streamlit>=1.40"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[project.scripts]
+sift = "sift_agent.cli:app"
+sift-ui = "sift_agent.ui:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sift_agent"]
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "W", "UP", "DTZ", "RUF"]
