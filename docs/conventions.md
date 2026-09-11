@@ -25,5 +25,5 @@ Multiple CLI processes and multiple UI sessions (threads in one process) must co
 
 - LLM nodes go through `graph._invoke_llm` (3 attempts, backoff) and fall back to deterministic heuristics on failure, recording a warning in state.
 - Non-fatal issues (LLM fallback, skipped charts) accumulate in `EDAState["warnings"]` (reducer: append) and are rendered in the report's Warnings section.
-- `load_data` enforces `MAX_CSV_BYTES` / `MAX_ROWS` input guards with clear error messages.
+- `load_data` enforces `MAX_INPUT_BYTES` / `MAX_ROWS` input guards with clear error messages; input parsing lives in `loader.py` and raises `LoadError` for every recoverable condition.
 - Logging via `logging.getLogger("sift_agent.<module>")`; never silent except-swallow — chart builders log and report failures via the warnings channel.

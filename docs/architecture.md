@@ -19,6 +19,7 @@ load_data → statistical_analysis → generate_visualizations → extract_insig
 |---|---|
 | `src/sift_agent/state.py` | `EDAState` typed graph state (DataFrame, profile, chart refs, insights, recommendations) — the contract between all nodes |
 | `src/sift_agent/graph.py` | LangGraph pipeline: node functions, LLM prompts, offline heuristic fallbacks, graph wiring |
+| `src/sift_agent/loader.py` | Input loading: CSV, Excel (`.xlsx`/`.xlsm`/`.xls`) and ODS; multi-sheet combine or single-sheet selection |
 | `src/sift_agent/analysis.py` | Statistical profiling (pure pandas/numpy) |
 | `src/sift_agent/visualize.py` | Chart generation; builders return a `ChartRef` whose caption feeds the insight LLM |
 | `src/sift_agent/report.py` | Assembles `report.md` and `profile.json` |
@@ -39,5 +40,6 @@ Each run writes artifacts to `output/<dataset>_<timestamp>/` (`report.md`, `prof
 ## Extending
 
 - New pipeline step → node function in `graph.py`, `graph.add_node(...)`, wire an edge; pass data through keys on `EDAState` in `state.py`.
+- New input format → extend `loader.py` (`SUPPORTED_SUFFIXES`, engine selection, `load_table()`); `load_data` handles the rest.
 - New provider → branch in `get_llm()` (`config.py`) returning a `langchain_core` chat model; update `PROVIDERS`, `DEFAULT_MODELS`, `REQUIRED_ENV`, and `.env.example`.
 - New chart → builder in `visualize.py` returning a `ChartRef`; its caption is fed to the insight LLM automatically.

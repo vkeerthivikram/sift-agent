@@ -1,12 +1,14 @@
 # sift-agent
 
-Auto-EDA agent: upload a CSV and get a statistical profile, visualizations, LLM-generated insights and recommendations. Powered by [LangGraph](https://langchain-ai.github.io/langgraph/).
+Auto-EDA agent: upload a CSV, Excel workbook or ODS spreadsheet and get a statistical profile, visualizations, LLM-generated insights and recommendations. Powered by [LangGraph](https://langchain-ai.github.io/langgraph/).
 
 ```
-CSV ──> load ──> statistical analysis ──> visualizations ──> insight extraction ──> recommendations ──> report
-              │                                            └──────────── LLM (or offline heuristics) ────────┘
-              └─ error ──────────────────────────────────────────────────────────────────────> stop
+CSV / Excel / ODS ──> load ──> statistical analysis ──> visualizations ──> insight extraction ──> recommendations ──> report
+               │                                     └──────────── LLM (or offline heuristics) ────────┘
+               └─ error ──────────────────────────────────────────────────────────────────────> stop
 ```
+
+Supported input formats: `.csv`, `.xlsx`, `.xlsm`, `.xls`, `.ods`. Excel/ODS workbooks with multiple sheets are handled too — see [Multi-sheet workbooks](#multi-sheet-workbooks).
 
 ## Quickstart
 
@@ -24,6 +26,7 @@ uv run sift-ui                       # opens http://localhost:8501
 
 ## What it does
 
+- Input formats: CSV, Excel (`.xlsx`/`.xlsm`/`.xls`) and ODF spreadsheets (`.ods`), including multi-sheet workbooks (combined automatically when sheets share columns, or load one sheet by name/index).
 - Statistical analysis of every column: means, quantiles, skew, IQR outliers, missing values, duplicates, constant columns, cardinality, top Pearson correlations, automatic ISO-datetime detection.
 - Charts: missing-value bars, histograms with KDE, box plots, categorical counts, correlation heatmap, scatter plots of the strongest relationships. Each chart is a PNG on disk.
 - Insight extraction: an LLM reads the computed profile plus chart captions and writes insights with real numbers. Offline mode uses deterministic heuristics instead.
@@ -91,8 +94,20 @@ Options:
   -m, --model TEXT        model / deployment name (provider-specific)
   -o, --output PATH       output directory (default: output/<name>_<timestamp>)
   -t, --temperature FLOAT LLM sampling temperature  [default: 0.2]
+  -s, --sheet TEXT        Excel/ODS sheet: name or 0-based index  [default: combine matching sheets]
 
 uv run sift providers     # list providers, required config and default models
+```
+
+#### Multi-sheet workbooks
+
+By default, `load_data` combines every non-empty sheet whose columns match, adding a `sheet` provenance column that records each row's origin; empty sheets are skipped with a warning. Sheets with different columns are rejected with an error listing them — pick one instead:
+
+```bash
+uv run sift run sales.xlsx -p none            # combine 'Jan' + 'Feb' (same columns)
+uv run sift run sales.xlsx -p none -s Feb     # only the 'Feb' sheet
+uv run sift run sales.xlsx -p none -s 0       # first sheet (0-based index)
+uv run sift run report.ods  -p none           # ODF spreadsheets work the same way
 ```
 
 The CLI streams node-by-node progress, prints insights and recommendations, and reports where artifacts were written.
@@ -129,8 +144,11 @@ uv run sift-ui          # or ./scripts/start-ui.sh to pick up .env
 1. Pick an LLM provider in the sidebar (`none` for offline heuristics).
 2. Paste credentials in the sidebar if you want. They apply to that run only and never touch the process environment. Leaving them empty falls back to environment variables.
 3. Set the model name and temperature. For `openai-compatible` the model is required, e.g. `zai-coding/glm-5.3-flash`.
-4. Upload a CSV and press **Run analysis**.
-5. Browse the tabs: Insights, Recommendations, Charts, Columns, Downloads (`report.md`, `profile.json`).
+4. Upload a CSV, Excel or ODS file. For multi-sheet workbooks a **Sheet** dropdown appears, populated from the file itself — pick one sheet or keep *auto — combine matching sheets*.
+5. Press **Run analysis**, then browse the tabs: Insights, Recommendations, Charts, Columns, **Preview** (first 100 rows of the loaded data) and Downloads (`report.md`, `profile.json`, all charts as a `.zip`).
+6. Use **Start over** in the sidebar to clear results and run another file.
+
+The UI look comes from the native Streamlit theme in `.streamlit/config.toml` (dark base, indigo primary).
 
 ## LLM providers
 
@@ -169,7 +187,7 @@ The pipeline is a LangGraph `StateGraph` over a typed state (`EDAState`) carryin
 
 | node | what it does |
 |---|---|
-| `load_data` | reads the CSV, infers ISO datetime columns, enforces input size guards, short-circuits to END on error |
+| `load_data` | reads the CSV/Excel/ODS input, resolves sheets, infers ISO datetime columns, enforces input size guards, short-circuits to END on error |
 | `statistical_analysis` | computes the full profile, pure pandas/numpy |
 | `generate_visualizations` | renders applicable charts with matplotlib/seaborn |
 | `extract_insights` | LLM prompt over profile JSON + chart captions, heuristic fallback when offline |
@@ -189,6 +207,7 @@ LLM prompts instruct the model to ground every claim in the provided numbers and
 ```
 sift-agent/
 ├── pyproject.toml          # deps, extras (ui, dev), console scripts: sift, sift-ui
+├── .streamlit/config.toml  # native Streamlit theme for the web UI
 ├── .env.example            # template for provider credentials (copy to .env)
 ├── AGENTS.md               # agent/contributor entry point
 ├── docs/                   # architecture, conventions, testing notes
@@ -205,6 +224,7 @@ sift-agent/
     ├── ui.py               # `sift-ui` launcher
     ├── config.py           # multi-provider LLM factory
     ├── graph.py            # LangGraph pipeline + prompts + heuristics
+    ├── loader.py           # input loading: CSV, Excel/ODS sheets
     ├── analysis.py         # statistical profiling
     ├── visualize.py        # chart generation
     ├── report.py           # markdown report assembly
@@ -220,7 +240,7 @@ uvx ruff check .           # lint
 uvx ruff format .          # format
 ```
 
-Chart and graph tests force failures by monkeypatching builders, so keep `generate_charts(..., failures=...)` and the `MAX_CSV_BYTES` / `MAX_ROWS` module globals patchable when you refactor.
+Chart and graph tests force failures by monkeypatching builders, so keep `generate_charts(..., failures=...)` and the `MAX_INPUT_BYTES` / `MAX_ROWS` module globals patchable when you refactor.
 
 ## Extending
 

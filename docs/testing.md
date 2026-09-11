@@ -13,4 +13,4 @@ How the test suite works and which seams it relies on.
 Chart/graph tests force failures by monkeypatching builders — keep these patchable module globals:
 
 - `generate_charts(..., failures=...)`
-- `graph.MAX_CSV_BYTES` / `MAX_ROWS`
+- `graph.MAX_INPUT_BYTES` / `MAX_ROWS`
