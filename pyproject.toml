@@ -1,7 +1,7 @@
 [project]
 name = "sift-agent"
 version = "0.1.0"
-description = "Auto-EDA agent: CSV in, statistical profile, charts, insights and recommendations out. Powered by LangGraph."
+description = "Auto-EDA agent: CSV/Excel/ODS in, statistical profile, charts, insights and recommendations out. Powered by LangGraph."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -16,6 +16,9 @@ dependencies = [
     "numpy>=1.26",
     "matplotlib>=3.8",
     "seaborn>=0.13",
+    "openpyxl>=3.1",
+    "xlrd>=2.0",
+    "odfpy>=1.4",
     "typer>=0.12",
     "rich>=13.7",
 ]
