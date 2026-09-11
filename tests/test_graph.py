@@ -1,5 +1,6 @@
 import json
 
+import pandas as pd
 import pytest
 
 from sift_agent import graph as graph_mod
@@ -26,10 +27,10 @@ def csv_path(tmp_path):
     return p
 
 
-def _run(graph, csv_path, out_dir):
+def _run(graph, input_path, out_dir):
     return graph.invoke(
         {
-            "csv_path": str(csv_path),
+            "input_path": str(input_path),
             "output_dir": str(out_dir),
             "provider": "none",
             "model": "",
@@ -65,7 +66,7 @@ def test_missing_csv_file(tmp_path):
 
 
 def test_size_guard(tmp_path, csv_path, monkeypatch):
-    monkeypatch.setattr(graph_mod, "MAX_CSV_BYTES", 10)
+    monkeypatch.setattr(graph_mod, "MAX_INPUT_BYTES", 10)
     final = _run(build_graph(None), csv_path, tmp_path / "out")
     assert "maximum supported size" in final["error"]
 
@@ -101,3 +102,20 @@ def test_chart_failure_recorded_as_warning(tmp_path, csv_path, monkeypatch):
     report = (tmp_path / "out" / "report.md").read_text()
     assert "## Warnings" in report
     assert "correlation_heatmap" in report
+
+
+def test_xlsx_end_to_end_multi_sheet(tmp_path):
+    p = tmp_path / "book.xlsx"
+    frame = pd.DataFrame({"id": [1, 2], "score": [10.0, 20.0]})
+    with pd.ExcelWriter(p, engine="openpyxl") as writer:
+        frame.to_excel(writer, sheet_name="Jan", index=False)
+        frame.assign(id=[3, 4], score=[30.0, 40.0]).to_excel(
+            writer, sheet_name="Feb", index=False
+        )
+    final = _run(build_graph(None), p, tmp_path / "out")
+    assert not final.get("error")
+    profile = json.loads((tmp_path / "out" / "profile.json").read_text())
+    assert profile["n_rows"] == 4
+    assert "sheet" in profile["columns"]
+    assert any("combined 2 sheets" in w for w in final.get("warnings") or [])
+    assert (tmp_path / "out" / "charts").exists()
