@@ -1,4 +1,4 @@
-"""sift CLI — run the auto-EDA agent on a CSV."""
+"""sift CLI — run the auto-EDA agent on a CSV, Excel or ODS file."""
 
 from __future__ import annotations
 
@@ -25,10 +25,12 @@ console = Console()
 
 @app.command()
 def run(
-    csv_path: Annotated[
+    input_path: Annotated[
         Path,
         typer.Argument(
-            exists=True, readable=True, help="Path to the CSV file to analyse."
+            exists=True,
+            readable=True,
+            help="Path to the CSV, Excel (.xlsx/.xlsm/.xls) or ODS (.ods) file to analyse.",
         ),
     ],
     provider: Annotated[
@@ -59,8 +61,19 @@ def run(
             "--temperature", "-t", min=0.0, max=2.0, help="LLM sampling temperature."
         ),
     ] = 0.2,
+    sheet: Annotated[
+        str | None,
+        typer.Option(
+            "--sheet",
+            "-s",
+            help=(
+                "Excel/ODS sheet to load: name or 0-based index. "
+                "Default: combine all non-empty sheets that share the same columns."
+            ),
+        ),
+    ] = None,
 ) -> None:
-    """Run the auto-EDA pipeline on a CSV: stats -> charts -> insights -> recommendations -> report."""
+    """Run the auto-EDA pipeline on a CSV/Excel/ODS file: stats -> charts -> insights -> recommendations -> report."""
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s"
     )
@@ -104,10 +117,11 @@ def run(
             raise typer.Exit(code=2)
         out_dir = output
     else:
-        base = Path("output") / f"{csv_path.stem}_{datetime.now(UTC):%Y%m%d-%H%M%S}"
+        base = Path("output") / f"{input_path.stem}_{datetime.now(UTC):%Y%m%d-%H%M%S}"
         out_dir = unique_dir(base)
     initial: dict = {
-        "csv_path": str(csv_path),
+        "input_path": str(input_path),
+        "sheet": sheet or "",
         "output_dir": str(out_dir),
         "provider": provider,
         "model": model or "",
