@@ -160,6 +160,11 @@ def _render_results(res: dict, out_dir: str) -> None:
     profile = res["profile"]
     out = Path(out_dir)
 
+    source = Path(res.get("input_path", ""))
+    sheet = (res.get("sheet") or "").strip()
+    source_label = f"`{source.name}`" + (f" · sheet `{sheet}`" if sheet else "")
+    st.caption(f"Source: {source_label}")
+
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Rows", f"{profile['n_rows']:,}")
     m2.metric("Columns", profile["n_columns"])
@@ -167,8 +172,8 @@ def _render_results(res: dict, out_dir: str) -> None:
     m4.metric("Columns w/ missing", len(profile.get("top_missing") or []))
     m5.metric("Memory", f"{profile['memory_mb']} MB")
 
-    tab_ins, tab_rec, tab_charts, tab_cols, tab_dl = st.tabs(
-        ["Insights", "Recommendations", "Charts", "Columns", "Downloads"]
+    tab_ins, tab_rec, tab_charts, tab_cols, tab_prev, tab_dl = st.tabs(
+        ["Insights", "Recommendations", "Charts", "Columns", "Preview", "Downloads"]
     )
 
     with tab_ins:
@@ -214,6 +219,14 @@ def _render_results(res: dict, out_dir: str) -> None:
                 )
             )
 
+    with tab_prev:
+        preview = st.session_state.get("preview_df")
+        if preview is None:
+            st.info("Run an analysis to see a preview of the loaded data.")
+        else:
+            st.dataframe(preview, use_container_width=True)
+            st.caption(f"First {len(preview):,} row(s) of the loaded data.")
+
     with tab_dl:
         report = Path(res.get("report_path", ""))
         if report.exists():
@@ -233,16 +246,53 @@ def _render_results(res: dict, out_dir: str) -> None:
             )
         st.caption(f"All artifacts are also saved on disk under `{out}`")
 
+        charts_dir = out / "charts"
+        pngs = sorted(charts_dir.glob("*.png")) if charts_dir.exists() else []
+        if pngs:
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w") as zf:
+                for png in pngs:
+                    zf.write(png, png.name)
+            st.download_button(
+                f"Download all {len(pngs)} charts (.zip)",
+                buf.getvalue(),
+                file_name="charts.zip",
+                mime="application/zip",
+            )
+
 
 st.title("sift — auto-EDA agent")
 st.caption(
-    "Upload a CSV to get a statistical profile, visualizations, insights and recommendations."
+    "Upload a CSV, Excel or ODS file to get a statistical profile, visualizations, insights and recommendations."
 )
 
-uploaded = st.file_uploader("Upload a CSV file", type=["csv"])
+uploaded = st.file_uploader(
+    "Upload a data file", type=["csv", "xlsx", "xlsm", "xls", "ods"]
+)
+
+AUTO_SHEET = "(auto — combine matching sheets)"
 
 if uploaded is not None:
-    settings_key = f"{uploaded.name}|{provider}|{model}|{temperature}"
+    data = uploaded.getvalue()
+    st.caption(f"`{uploaded.name}` · {_human_size(len(data))}")
+
+    sheet = ""
+    suffix = Path(uploaded.name).suffix.lower()
+    if suffix in WORKBOOK_SUFFIXES:
+        try:
+            sheets = _cached_sheet_names(data, suffix)
+        except LoadError as exc:
+            st.caption(
+                f"Could not preview sheets ({exc}); sheets are combined at run time."
+            )
+        else:
+            if len(sheets) > 1:
+                choice = st.selectbox("Sheet", [AUTO_SHEET, *sheets])
+                sheet = "" if choice == AUTO_SHEET else choice
+            else:
+                st.caption(f"Workbook has one sheet: `{sheets[0]}`")
+
+    settings_key = f"{uploaded.name}|{sheet}|{provider}|{model}|{temperature}"
     if st.session_state.get("run_settings") != settings_key:
         st.session_state["run_settings"] = settings_key
         st.session_state.pop("result", None)
