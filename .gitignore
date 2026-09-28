@@ -38,5 +38,6 @@ Thumbs.db
 # Unlazy orchestration state
 .unlazy/
 
-.kilo/
-.venv/
+# mise local overrides (committed config lives in .mise.toml)
+.mise.local.toml
+.mise.local/
