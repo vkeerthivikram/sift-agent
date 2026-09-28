@@ -3,9 +3,10 @@
 Auto-EDA agent: upload a CSV, Excel workbook or ODS spreadsheet and get a statistical profile, visualizations, LLM-generated insights and recommendations. Powered by [LangGraph](https://langchain-ai.github.io/langgraph/).
 
 ```
-CSV / Excel / ODS ──> load ──> statistical analysis ──> visualizations ──> insight extraction ──> recommendations ──> report
-               │                                     └──────────── LLM (or offline heuristics) ────────┘
-               └─ error ──────────────────────────────────────────────────────────────────────> stop
+CSV / Excel / ODS ──> load ──> statistical analysis ──> visualizations ──> insight extraction ──> recommendations ──> agentic investigation ──> anomaly drill-down ──> report
+               │                                     └──────────────────── LLM (or offline heuristics) ────────────────────────────────┘                │
+               └─ error ───────────────────────────────────────────────────────────────────────────────────────────> stop                                       │
+                                                                 └──> sift ask / "Ask the data" chat (Q&A over the profile, no pipeline run needed)
 ```
 
 Supported input formats: `.csv`, `.xlsx`, `.xlsm`, `.xls`, `.ods`. Excel/ODS workbooks with multiple sheets are handled too — see [Multi-sheet workbooks](#multi-sheet-workbooks).
@@ -27,10 +28,15 @@ uv run sift-ui                       # opens http://localhost:8501
 ## What it does
 
 - Input formats: CSV, Excel (`.xlsx`/`.xlsm`/`.xls`) and ODF spreadsheets (`.ods`), including multi-sheet workbooks (combined automatically when sheets share columns, or load one sheet by name/index).
-- Statistical analysis of every column: means, quantiles, skew, IQR outliers, missing values, duplicates, constant columns, cardinality, top Pearson correlations, automatic ISO-datetime detection.
-- Charts: missing-value bars, histograms with KDE, box plots, categorical counts, correlation heatmap, scatter plots of the strongest relationships. Each chart is a PNG on disk.
+- Statistical analysis of every column: means, quantiles (p05/p25/median/p75/p95), skew, kurtosis, mode, zeros/negatives, IQR outliers with examples, missing values, duplicates, constant columns, cardinality, top Pearson and Spearman correlations, bias-corrected Cramér's V between categoricals, numeric-by-category group means, datetime spans, co-missingness patterns, ID-like column detection, automatic ISO-datetime detection.
+- Data-quality checks: numbers or dates stored as text, sentinel placeholder values (`n/a`, -999, …), stray/blank-only whitespace, inconsistent casing.
+- **PII detection**: flags string columns that look like emails, phone numbers, US Social Security Numbers, credit-card numbers or IP addresses, so you know what to redact before sharing a report or dataset.
+- **Data health score**: a 0-100 score with an A-F grade and a four-component breakdown (completeness, uniqueness, consistency, validity), shown in the CLI, the web UI and both reports.
+- Charts: missing-value bars, histograms with KDE, box plots, categorical counts, correlation heatmap, scatter plots of the strongest relationships, numeric-by-category box plots, time-trend lines. Each chart is a PNG on disk.
 - Insight extraction: an LLM reads the computed profile plus chart captions and writes insights with real numbers. Offline mode uses deterministic heuristics instead.
 - Recommendations: prioritized data cleaning, feature engineering and modeling next steps, specific to your columns.
+- **Shareable HTML report**: every run also writes a self-contained `report.html` — dark themed, charts embedded as base64, health panel up top — that opens offline in any browser and can be emailed to a client as-is.
+- **Agentic mode**: after the fixed pipeline, an agent investigation loop probes the dataset with analysis tools (LLM tool-calling when a provider is configured, deterministic offline otherwise), an anomaly drill-down dissects the worst outlier column, and `sift ask` / the UI chat tab answer natural-language questions — see [Agentic mode](#agentic-mode).
 - Multiple LLM backends: OpenAI, Anthropic, Azure OpenAI, AWS Bedrock, any OpenAI-compatible endpoint (Kilo Gateway, vLLM, Ollama, LM Studio, ...), plus an offline mode that needs no keys.
 - Two frontends over the same pipeline: the `sift` CLI and the `sift-ui` web app.
 
@@ -97,6 +103,7 @@ Options:
   -s, --sheet TEXT        Excel/ODS sheet: name or 0-based index  [default: combine matching sheets]
 
 uv run sift providers     # list providers, required config and default models
+uv run sift ask data.csv "how many rows are missing col_x?"   # Q&A, offline by default
 ```
 
 #### Multi-sheet workbooks
@@ -145,7 +152,7 @@ uv run sift-ui          # or ./scripts/start-ui.sh to pick up .env
 2. Paste credentials in the sidebar if you want. They apply to that run only and never touch the process environment. Leaving them empty falls back to environment variables.
 3. Set the model name and temperature. For `openai-compatible` the model is required, e.g. `zai-coding/glm-5.3-flash`.
 4. Upload a CSV, Excel or ODS file. For multi-sheet workbooks a **Sheet** dropdown appears, populated from the file itself — pick one sheet or keep *auto — combine matching sheets*.
-5. Press **Run analysis**, then browse the tabs: Insights, Recommendations, Charts, Columns, **Preview** (first 100 rows of the loaded data) and Downloads (`report.md`, `profile.json`, all charts as a `.zip`).
+5. Press **Run analysis**, then browse the tabs: Insights, Recommendations, Charts, Columns, **Preview** (first 100 rows of the loaded data) and Downloads (`report.md`, the shareable `report.html`, `profile.json`, all charts as a `.zip`). A **data-health banner** with score, grade and component breakdown sits above the tabs.
 6. Use **Start over** in the sidebar to clear results and run another file.
 
 The UI look comes from the native Streamlit theme in `.streamlit/config.toml` (dark base, indigo primary).
@@ -161,38 +168,104 @@ The UI look comes from the native Streamlit theme in `.streamlit/config.toml` (d
 | `openai-compatible` | `OPENAI_BASE_URL`, `OPENAI_API_KEY` (`EMPTY` for local servers); `--model` required | none, you must pass `-m` |
 | `none` | no LLM, deterministic heuristic insights | not applicable |
 
+## Demoing it
+
+The fastest client demo needs no API keys and shows every detection feature. `examples/messy_orders.csv` is a deliberately dirty dataset (duplicate rows, -999 sentinels, dates stored as text, mixed-case categories, whitespace notes, 13% missing delivery times, a 0.99-correlated revenue/cost pair):
+
+```bash
+uv sync --extra ui
+uv run sift run examples/messy_orders.csv -p none   # watch the detectors fire
+uv run sift-ui                                       # then do it live in the browser
+```
+
+The CLI prints the health score and grade up front; the UI shows a health banner, the flagged issues and the recommendations; `output/<run>/report.html` is the artifact to hand over. Verify the whole flow in one command with `uv run python scripts/verify_poc.py`.
+
+## Agentic mode
+
+Beyond the fixed pipeline, sift investigates the data like an analyst and answers your questions directly.
+
+### Agent investigations
+
+After recommendations, the `agentic_investigation` node runs a tool-calling loop over the dataset:
+
+- **With an LLM configured** (`-p openai`, `-p anthropic`, ...): the model picks its own tools — correlation checks, group comparisons, missingness analysis, value scans, outlier inspection, time slices — up to four rounds, and writes up what it found.
+- **Offline (`-p none`, the default)**: the same toolkit runs deterministically against the worst outlier column, the strongest correlated pair and the biggest numeric-by-category split.
+
+Every call (round, tool, arguments, summary) lands in an **agent trace** rendered in `report.md` under "Agent investigations", in `report.html`, and in the UI's **Agent trace** expander.
+
+### Anomaly drill-down
+
+The `anomaly_drilldown` node takes the column with the most IQR outliers and dissects it: bounds, example values, how outliers shift the mean versus the rest, and which categories move most — 0-2 drill-down reports per run, shown in the "Anomaly drill-down" report section (skipped gracefully when there is nothing to drill into).
+
+### Ask the data — CLI
+
+`sift ask` answers natural-language questions about a file, no pipeline run needed:
+
+```bash
+uv run sift ask examples/messy_orders.csv "how many rows are missing delivery_days?"
+# delivery_days: 75 of 550 values missing (13.64%).
+
+uv run sift ask examples/messy_orders.csv "what is the max amount_usd?"
+# amount_usd: maximum 23,501.25 (550 non-null values).
+
+uv run sift ask examples/messy_orders.csv "is revenue correlated with cost?"
+# Pearson r between revenue and cost = +0.997 (550 complete pairs).
+```
+
+Offline (the default) a deterministic intent engine answers questions about missingness, row counts, max/min/average, unique values, correlations and dtypes — every number computed from the data, never fabricated, with the touched columns listed under `sources:`. With a provider configured, questions go to the LLM grounded in the relevant profile facts, so free-form questions work too:
+
+```bash
+uv run --env-file .env sift ask examples/messy_orders.csv "why might delivery_days be missing?" -p openai
+```
+
+It takes the same options as `run` (`-p/--provider`, `-m/--model`, `-s/--sheet`, `-t/--temperature`).
+
+### Ask the data — web UI
+
+After a run, the **Ask the data** tab becomes a chat over the analyzed dataset: type a question, get a grounded answer with its sources; offline answers carry an `offline` badge, and if the LLM is unavailable the question is answered offline with a note. Chat history is kept per run, so re-running an analysis starts a fresh conversation.
+
 ## Output artifacts
 
 Each run writes to `output/<dataset>_<timestamp>/`:
 
 ```
 output/customers_20260908-171830/
-├── report.md        # full markdown report: overview, missing values, column profiles,
-│                    # correlations, embedded charts, insights, recommendations
-├── profile.json     # machine-readable statistical profile
+├── report.md        # full markdown report: executive summary, data health,
+│                    # overview, sample rows, missing values, column profiles,
+│                    # data quality, potential PII, outliers, correlations (Pearson +
+│                    # Spearman), categorical associations, group differences,
+│                    # charts, insights, recommendations, agent investigations
+│                    # (trace + findings), anomaly drill-down (when data exists)
+├── report.html      # standalone shareable version — inline CSS, charts
+│                    # embedded as base64, health panel; opens offline
+├── profile.json     # machine-readable statistical profile (incl. health)
 └── charts/          # PNG charts
     ├── 01_missing_values.png
     ├── 02_distributions.png     # histograms + KDE (numeric)
     ├── 03_boxplots.png          # box plots (numeric)
     ├── 04_categorical_counts.png
     ├── 05_correlation_heatmap.png
-    └── 06_relationships.png     # scatters of strongest correlations
+    ├── 06_relationships.png     # scatters of strongest correlations
+    ├── 07_grouped_boxplots.png  # numeric split by low-cardinality category
+    └── 08_time_trend.png        # numeric means per period over a datetime column
 ```
 
 Charts that do not apply to the data (no missing values, too few numeric columns) are skipped automatically.
 
 ## How it works
 
-The pipeline is a LangGraph `StateGraph` over a typed state (`EDAState`) carrying the DataFrame, statistical profile, chart references, insights and recommendations:
+The pipeline is a LangGraph `StateGraph` over a typed state (`EDAState`) carrying the DataFrame, statistical profile, chart references, insights, recommendations and the agent trace:
 
 | node | what it does |
 |---|---|
 | `load_data` | reads the CSV/Excel/ODS input, resolves sheets, infers ISO datetime columns, enforces input size guards, short-circuits to END on error |
-| `statistical_analysis` | computes the full profile, pure pandas/numpy |
+| `statistical_analysis` | computes the full profile plus the data-health score, pure pandas/numpy |
 | `generate_visualizations` | renders applicable charts with matplotlib/seaborn |
 | `extract_insights` | LLM prompt over profile JSON + chart captions, heuristic fallback when offline |
 | `recommendations` | LLM prompt over profile + insights, heuristic fallback when offline |
-| `build_report` | assembles `report.md` and `profile.json` |
+| `agentic_investigation` | agent loop over the investigation toolkit: LLM tool-calling when a provider is configured, deterministic tool picks offline; every call recorded in the agent trace |
+| `anomaly_drilldown` | dissects the top outlier column (IQR bounds, examples, mean shift vs the rest, category shifts); 0-2 reports per run |
+| `build_report` | assembles `report.md`, the shareable `report.html` and `profile.json` |
 
 LLM prompts instruct the model to ground every claim in the provided numbers and cite column names, so nothing gets fabricated.
 
@@ -226,8 +299,12 @@ sift-agent/
     ├── graph.py            # LangGraph pipeline + prompts + heuristics
     ├── loader.py           # input loading: CSV, Excel/ODS sheets
     ├── analysis.py         # statistical profiling
+    ├── investigate.py      # investigation toolkit for the agent loop (tools + specs)
+    ├── qa.py               # dataset Q&A: context retrieval + offline/LLM answers
+    ├── scoring.py          # data health score (0-100, A-F, components)
     ├── visualize.py        # chart generation
     ├── report.py           # markdown report assembly
+    ├── html_report.py      # standalone shareable HTML report
     └── state.py            # typed graph state
 ```
 
@@ -250,8 +327,12 @@ Chart and graph tests force failures by monkeypatching builders, so keep `genera
 
 ## Sample data
 
-`examples/customers.csv` is a synthetic 615-row customer dataset (numeric, categorical, boolean, datetime and ID columns, injected missing values, duplicates, skew and correlated features) for trying the pipeline:
+Two synthetic datasets ship with the repo:
+
+- `examples/customers.csv` — 615 rows (numeric, categorical, boolean, datetime and ID columns, injected missing values, duplicates, skew and correlated features) for a normal run.
+- `examples/messy_orders.csv` — 550 deliberately dirty order records for demoing the detection features: 10 duplicate rows, 8 `-999` sentinels, non-ISO text dates, mixed-case regions, whitespace-only notes, 13.6% missing delivery times and a 0.99-correlated revenue/cost pair.
 
 ```bash
 uv run sift run examples/customers.csv -p none
+uv run sift run examples/messy_orders.csv -p none
 ```

@@ -34,3 +34,9 @@ Thumbs.db
 .mimosa/
 .kilo/
 .env
+
+# Unlazy orchestration state
+.unlazy/
+
+.kilo/
+.venv/

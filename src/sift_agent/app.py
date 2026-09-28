@@ -21,8 +21,35 @@ from sift_agent.config import DEFAULT_MODELS, PROVIDERS, REQUIRED_ENV, get_llm
 from sift_agent.graph import run_pipeline
 from sift_agent.loader import WORKBOOK_SUFFIXES, LoadError, sheet_names
 from sift_agent.paths import unique_dir
+from sift_agent.qa import answer_question
 
-st.set_page_config(page_title="sift — auto-EDA", page_icon="mag", layout="wide")
+st.set_page_config(page_title="sift — auto-EDA", page_icon=":mag:", layout="wide")
+
+
+def _health_banner(health: dict) -> None:
+    """Colored one-line health banner plus a component breakdown expander."""
+    score = health.get("score", 0)
+    grade = health.get("grade", "?")
+    color = "#3fb950" if score >= 90 else ("#d29922" if score >= 70 else "#f85149")
+    st.markdown(
+        f'<div style="display:flex;align-items:center;gap:18px;padding:14px 22px;'
+        f'border:1px solid #35354a;border-radius:12px;background:#24242e;">'
+        f'<span style="font-size:44px;font-weight:700;color:{color};'
+        f'line-height:1;">{score}</span>'
+        f'<span style="font-size:22px;font-weight:700;color:{color};">{grade}</span>'
+        f'<span style="color:#d9d9e3;">{health.get("verdict", "")}</span></div>',
+        unsafe_allow_html=True,
+    )
+    components = health.get("components") or []
+    if components:
+        with st.expander("Health score components"):
+            for comp in components:
+                c_score = comp.get("score", 0)
+                st.markdown(
+                    f"**{comp.get('label', comp.get('key', ''))}** — "
+                    f":{'green' if c_score >= 90 else ('orange' if c_score >= 70 else 'red')}:"
+                    f"{c_score}/100 · {comp.get('detail', '')}"
+                )
 
 
 @st.cache_data
@@ -97,7 +124,15 @@ with st.sidebar:
     )
     st.divider()
     if st.button("Start over"):
-        for key in ("result", "out_dir", "run_settings", "preview_df"):
+        for key in (
+            "result",
+            "out_dir",
+            "run_settings",
+            "preview_df",
+            "last_df",
+            "last_profile",
+            "run_llm_settings",
+        ):
             st.session_state.pop(key, None)
         st.rerun()
 
@@ -152,8 +187,121 @@ def _run_analysis(
     df = final.pop("df", None)
     if df is not None:
         st.session_state["preview_df"] = df.head(100)
+        st.session_state["last_df"] = df
+    st.session_state["last_profile"] = final.get("profile") or {}
+    st.session_state["run_llm_settings"] = {
+        "provider": provider,
+        "model": model,
+        "temperature": temperature,
+        "env": env,
+    }
     st.session_state["result"] = final
     st.session_state["out_dir"] = str(out_dir)
+    for key in [k for k in st.session_state if str(k).startswith("chat_")]:
+        del st.session_state[key]
+
+
+def _render_chat_message(msg: dict) -> None:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if msg.get("note"):
+            st.caption(msg["note"])
+        if msg.get("offline"):
+            st.caption("offline — deterministic answer")
+        if msg.get("sources"):
+            st.caption("sources: " + ", ".join(msg["sources"]))
+
+
+def _answer_chat(question: str) -> dict:
+    """Answer one question against the last run's data; LLM failures go offline."""
+    settings = st.session_state.get("run_llm_settings") or {}
+    llm = None
+    note = ""
+    if settings.get("provider", "none") != "none":
+        try:
+            llm = get_llm(
+                settings["provider"],
+                model=settings.get("model") or None,
+                temperature=settings.get("temperature", 0.2),
+                env=settings.get("env") or {},
+            )
+        except Exception as exc:
+            note = (
+                f"LLM unavailable ({exc.__class__.__name__}); "
+                "answered with the offline engine instead."
+            )
+    result = answer_question(
+        question,
+        st.session_state.get("last_df"),
+        st.session_state.get("last_profile") or {},
+        llm=llm,
+    )
+    if not note and result.get("warning"):
+        note = result["warning"]
+    if note:
+        result["note"] = note
+    return result
+
+
+def _render_ask_tab(out_dir: str) -> None:
+    df = st.session_state.get("last_df")
+    profile = st.session_state.get("last_profile")
+    if df is None or profile is None:
+        st.info("Run an analysis first, then ask questions about the data.")
+        return
+    history: list[dict] = st.session_state.setdefault(f"chat_{out_dir}", [])
+    for msg in history:
+        _render_chat_message(msg)
+    question = st.chat_input(
+        "Ask a question about this dataset…", key=f"chat_input_{out_dir}"
+    )
+    if question:
+        history.append({"role": "user", "content": question})
+        _render_chat_message(history[-1])
+        result = _answer_chat(question)
+        entry = {
+            "role": "assistant",
+            "content": result["answer"],
+            "sources": result.get("sources") or [],
+            "offline": bool(result.get("offline")),
+        }
+        if result.get("note"):
+            entry["note"] = result["note"]
+        history.append(entry)
+        _render_chat_message(entry)
+
+
+def _render_agent_trace(res: dict) -> None:
+    trace = res.get("agent_trace") or []
+    if trace:
+        with st.expander(f"Agent trace ({len(trace)} tool call(s))"):
+            rows = [
+                {
+                    "round": entry.get("round", ""),
+                    "tool": entry.get("tool", ""),
+                    "args": ", ".join(
+                        f"{k}={v!r}" for k, v in (entry.get("args") or {}).items()
+                    )
+                    or "—",
+                    "summary": entry.get("summary", ""),
+                }
+                for entry in trace
+            ]
+            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+    anomalies = res.get("anomaly_reports") or []
+    if anomalies:
+        with st.expander(f"Anomaly drill-down ({len(anomalies)} report(s))"):
+            for i, rep in enumerate(anomalies):
+                st.markdown(
+                    f"**`{rep.get('column', '?')}`** — "
+                    f"{rep.get('n_outliers', '?')} outlier(s)"
+                )
+                if rep.get("comparison"):
+                    st.caption(rep["comparison"])
+                if rep.get("narrative"):
+                    st.markdown(rep["narrative"])
+                if i < len(anomalies) - 1:
+                    st.divider()
 
 
 def _render_results(res: dict, out_dir: str) -> None:
@@ -165,19 +313,39 @@ def _render_results(res: dict, out_dir: str) -> None:
     source_label = f"`{source.name}`" + (f" · sheet `{sheet}`" if sheet else "")
     st.caption(f"Source: {source_label}")
 
-    m1, m2, m3, m4, m5 = st.columns(5)
+    health = profile.get("health") or {}
+    m1, m2, m3, m4, m5, m6 = st.columns(6)
     m1.metric("Rows", f"{profile['n_rows']:,}")
     m2.metric("Columns", profile["n_columns"])
     m3.metric("Duplicate rows", f"{profile['duplicate_rows']:,}")
     m4.metric("Columns w/ missing", len(profile.get("top_missing") or []))
     m5.metric("Memory", f"{profile['memory_mb']} MB")
+    if health:
+        m6.metric(
+            "Data health",
+            f"{health.get('score')}/100",
+            f"grade {health.get('grade')}",
+            delta_color="off",
+        )
 
-    tab_ins, tab_rec, tab_charts, tab_cols, tab_prev, tab_dl = st.tabs(
-        ["Insights", "Recommendations", "Charts", "Columns", "Preview", "Downloads"]
+    if health:
+        _health_banner(health)
+
+    tab_ins, tab_rec, tab_charts, tab_cols, tab_prev, tab_ask, tab_dl = st.tabs(
+        [
+            "Insights",
+            "Recommendations",
+            "Charts",
+            "Columns",
+            "Preview",
+            "Ask the data",
+            "Downloads",
+        ]
     )
 
     with tab_ins:
         st.markdown(res.get("insights") or "_no insights generated_")
+        _render_agent_trace(res)
 
     with tab_rec:
         st.markdown(res.get("recommendations") or "_no recommendations generated_")
@@ -227,7 +395,18 @@ def _render_results(res: dict, out_dir: str) -> None:
             st.dataframe(preview, use_container_width=True)
             st.caption(f"First {len(preview):,} row(s) of the loaded data.")
 
+    with tab_ask:
+        _render_ask_tab(out_dir)
+
     with tab_dl:
+        html_report = Path(res.get("html_report_path") or "")
+        if html_report.exists():
+            st.download_button(
+                "Download report.html (shareable)",
+                html_report.read_bytes(),
+                file_name="report.html",
+                mime="text/html",
+            )
         report = Path(res.get("report_path", ""))
         if report.exists():
             st.download_button(

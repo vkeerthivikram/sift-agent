@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -10,6 +11,11 @@ from sift_agent.graph import build_graph
 class _BoomLLM:
     def invoke(self, messages):
         raise RuntimeError("provider down")
+
+
+class _EmptyLLM:
+    def invoke(self, messages):
+        return type("Response", (), {"content": "   "})()
 
 
 @pytest.fixture()
@@ -52,6 +58,28 @@ def test_offline_end_to_end(tmp_path, csv_path):
     assert final["recommendations"]
 
 
+def test_offline_end_to_end_health_and_html(tmp_path, csv_path):
+    final = _run(build_graph(None), csv_path, tmp_path / "out")
+    assert not final.get("error")
+    profile = json.loads((tmp_path / "out" / "profile.json").read_text())
+    health = profile["health"]
+    assert 0 <= health["score"] <= 100
+    assert health["grade"] in {"A", "B", "C", "D", "F"}
+    assert len(health["components"]) == 4
+    assert health["verdict"]
+
+    html_path = Path(final["html_report_path"])
+    assert html_path.exists()
+    page = html_path.read_text()
+    assert "data:image/png;base64" in page
+    assert 'src="charts/' not in page
+    assert health["grade"] in page
+
+    report = (tmp_path / "out" / "report.md").read_text()
+    assert "## Executive summary" in report
+    assert "### Data health" in report
+
+
 def test_bad_csv_routes_to_error(tmp_path):
     bad = tmp_path / "bad.csv"
     bad.write_text("not,a,csv\n", encoding="utf-8")  # header only, no rows
@@ -87,6 +115,18 @@ def test_llm_failure_falls_back_to_heuristics(tmp_path, csv_path, monkeypatch):
     assert any("insight LLM call failed" in w for w in warnings)
     assert any("recommendations LLM call failed" in w for w in warnings)
     assert "provider down" in "".join(warnings) or "RuntimeError" in "".join(warnings)
+
+
+def test_empty_llm_response_falls_back_to_heuristics(tmp_path, csv_path, monkeypatch):
+    monkeypatch.setattr(graph_mod, "LLM_RETRY_BACKOFF_S", 0.0)
+    final = _run(build_graph(_EmptyLLM()), csv_path, tmp_path / "out")
+    assert not final.get("error")
+    assert final["insights"].startswith("- Dataset has")
+    assert final["recommendations"]
+    warnings = " ".join(final.get("warnings") or [])
+    assert "insight LLM call failed" in warnings
+    assert "recommendations LLM call failed" in warnings
+    assert "ValueError" in warnings
 
 
 def test_chart_failure_recorded_as_warning(tmp_path, csv_path, monkeypatch):

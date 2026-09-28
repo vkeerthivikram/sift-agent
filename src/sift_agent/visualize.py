@@ -21,7 +21,12 @@ import seaborn as sns
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 
-from .analysis import iqr_outlier_pct, top_correlations, top_pairs_from_corr
+from .analysis import (
+    iqr_outlier_pct,
+    top_category_pairs,
+    top_correlations,
+    top_pairs_from_corr,
+)
 from .state import ChartRef
 
 sns.set_theme(style="whitegrid", palette="deep")
@@ -34,6 +39,7 @@ _CATEGORICAL_CARDINALITY = 20
 _MAX_HEATMAP_COLS = 40
 _MAX_SCATTER_POINTS = 2000
 _MAX_KDE_POINTS = 50_000
+_MAX_GROUP_PLOTS = 3
 
 
 def _numeric_columns(df: pd.DataFrame, n_unique: dict[str, int]) -> list[str]:
@@ -248,6 +254,70 @@ def _scatter_grid(
     )
 
 
+def _grouped_boxplots(df: pd.DataFrame, charts_dir: Path) -> ChartRef | None:
+    """Box plots of numeric columns split by a low-cardinality category."""
+    pairs = [p for p in top_category_pairs(df, limit=_MAX_GROUP_PLOTS)]
+    if not pairs:
+        return None
+    fig, axes = _grid(len(pairs), min(len(pairs), 3), w=5.0, h=4.0)
+    for ax, p in zip(axes.flat, pairs):
+        data = df[[p["category"], p["numeric"]]].dropna()
+        sns.boxplot(data=data, x=p["category"], y=p["numeric"], ax=ax)
+        ax.set_title(f"{p['numeric']} by {p['category']}", fontsize=10)
+        ax.set_xlabel("")
+        ax.tick_params(axis="x", labelsize=8)
+    _hide_extra(axes, len(pairs))
+    path = charts_dir / "07_grouped_boxplots.png"
+    _save(fig, path)
+    detail = "; ".join(
+        f"{p['numeric']} by {p['category']} (spread {p['spread']:.1f}σ)" for p in pairs
+    )
+    caption = f"Numeric distributions grouped by category, strongest group differences first: {detail}."
+    return ChartRef(
+        title="Numeric by Category", path=f"charts/{path.name}", caption=caption
+    )
+
+
+def _time_trend(df: pd.DataFrame, charts_dir: Path) -> ChartRef | None:
+    """Mean of numeric columns per period over the first datetime column."""
+    dt_cols = [c for c in df.columns if pd.api.types.is_datetime64_any_dtype(df[c])]
+    if not dt_cols:
+        return None
+    dcol = dt_cols[0]
+    nums = [
+        c
+        for c in df.select_dtypes(include=[np.number]).columns
+        if not pd.api.types.is_bool_dtype(df[c]) and df[c].nunique(dropna=True) > 1
+    ][:3]
+    if not nums:
+        return None
+    data = df[[dcol, *nums]].dropna(subset=[dcol]).sort_values(dcol)
+    if len(data) < 3:
+        return None
+    span = data[dcol].max() - data[dcol].min()
+    if span <= pd.Timedelta(days=90):
+        freq, unit = "D", "day"
+    elif span <= pd.Timedelta(days=3 * 365):
+        freq, unit = "W", "week"
+    else:
+        freq, unit = "MS", "month"
+    ts = data.set_index(dcol)[nums].resample(freq).mean().dropna(how="all")
+    if len(ts) < 2:
+        return None
+    fig = _figure((10, 4.5))
+    ax = fig.subplots()
+    for col in ts.columns:
+        ax.plot(ts.index, ts[col], label=col, linewidth=1.5)
+    ax.set_title(f"Mean of {', '.join(map(str, ts.columns))} per {unit} over {dcol}")
+    ax.set_ylabel("mean")
+    ax.legend(fontsize=8)
+    fig.autofmt_xdate()
+    path = charts_dir / "08_time_trend.png"
+    _save(fig, path)
+    caption = f"Time trend of {', '.join(map(str, ts.columns))}: mean per {unit} across `{dcol}`."
+    return ChartRef(title="Time Trend", path=f"charts/{path.name}", caption=caption)
+
+
 def generate_charts(
     df: pd.DataFrame,
     charts_dir: Path,
@@ -279,6 +349,8 @@ def generate_charts(
             "relationships",
             lambda: _scatter_grid(df, charts_dir, numeric, pairs=corr_pairs),
         ),
+        ("grouped_boxplots", lambda: _grouped_boxplots(df, charts_dir)),
+        ("time_trend", lambda: _time_trend(df, charts_dir)),
     ]
 
     def _safe(name: str, build):

@@ -1,0 +1,551 @@
+order_id,order_date,customer_region,channel,amount_usd,discount_pct,delivery_days,satisfaction,notes,revenue,cost
+ORD-0001,2024/05/21,South,web,104.45,7,10.0,5.0,vip customer,1292.58,734.39
+ORD-0002,2024/03/04,North,web,413.35,15,2.0,5.0,   ,322.52,195.14
+ORD-0003,2024/11/20,North,app,297.47,8,7.0,2.0,fragile items included,407.72,246.55
+ORD-0004,2024/04/11,South,web,88.55,6,10.0,3.0,no weekend delivery,841.49,488.97
+ORD-0005,2024/09/12,West,store,18.16,23,12.0,5.0,"rush, ship today (gift)",988.67,546.52
+ORD-0006,2024/02/22,South,store,70.2,10,,1.0,no weekend delivery (gift),546.34,284.44
+ORD-0007,2024/10/09,East,web,17.4,27,,3.0,expedite shipping - confirmed,747.12,461.62
+ORD-0008,2024/05/25,south,store,137.41,8,,1.0,fragile items included,1681.26,971.13
+ORD-0009,2024/12/18,North,app,352.94,25,4.0,4.0,standard delivery (repeat),685.29,472.38
+ORD-0010,2024/10/27,SOUTH,app,145.56,15,4.0,5.0,partial shipment ok - confirmed,373.94,236.05
+ORD-0011,2024/09/04,south,app,80.05,28,10.0,1.0,expedite shipping (gift),883.15,541.25
+ORD-0012,2024/09/23,West,web,229.18,23,3.0,3.0,sample included,1674.78,989.9
+ORD-0013,2024/01/21,East,store,55.75,13,,2.0,return label enclosed,780.25,449.6
+ORD-0014,2024/04/07,North,app,96.57,12,11.0,2.0,repeat buyer,1176.62,694.94
+ORD-0015,2024/05/30,West,store,60.15,6,12.0,4.0,standard delivery (repeat),713.3,436.47
+ORD-0016,2024/11/19,south,web,55.28,13,9.0,5.0,invoice separately,374.9,252.13
+ORD-0017,2024/08/04,South,store,155.99,14,7.0,,bulk order,1531.84,866.79
+ORD-0018,2024/07/16,North,app,20.5,15,13.0,,"customer called, confirmed address",1683.2,974.3
+ORD-0019,2024/01/01,South,app,313.12,30,14.0,4.0,return label enclosed,1023.31,471.63
+ORD-0020,2024/02/16,South,store,60.25,29,13.0,4.0,bulk order,1885.41,1059.58
+ORD-0021,2024/07/02,North,store,204.74,16,,2.0,standard delivery (repeat),567.21,286.23
+ORD-0022,2024/09/05,North,store,15.82,26,13.0,2.0,vip customer (gift),3012.38,1700.11
+ORD-0023,2024/03/10,South,app,59.01,13,9.0,5.0,invoice separately,964.73,530.84
+ORD-0024,2024/11/16,south,web,193.33,20,3.0,3.0,updated shipping address,602.03,327.75
+ORD-0025,2024/03/08,NORTH,web,17.26,8,4.0,2.0,no weekend delivery - confirmed,1029.82,599.09
+ORD-0026,2024/02/16,West,store,102.7,28,9.0,,"rush, ship today",5228.44,2997.33
+ORD-0027,2024/12/01,North,app,225.73,11,5.0,5.0,leave at front desk (gift),1002.81,599.59
+ORD-0028,2024/02/17,North,web,202.73,15,8.0,4.0,   ,1353.06,753.67
+ORD-0029,2024/10/30,South,store,116.67,10,6.0,2.0,updated shipping address - priority,2055.31,1225.84
+ORD-0030,2024/04/08,East,app,322.82,14,2.0,1.0,bulk order - priority,1131.7,649.33
+ORD-0031,2024/12/17,North,web,441.09,23,10.0,5.0,bulk order,459.87,260.01
+ORD-0032,2024/11/19,South,store,34.73,3,9.0,5.0,"rush, ship today (repeat)",1408.74,764.69
+ORD-0033,2024/03/22,West,web,140.58,4,1.0,2.0,no weekend delivery,676.07,400.69
+ORD-0034,2024/06/30,SOUTH,app,35.64,15,,2.0,updated shipping address,566.04,336.59
+ORD-0035,2024/09/23,West,app,76.78,8,2.0,1.0,call before delivery,667.16,406.92
+ORD-0036,2024/11/07,EAST,app,269.13,22,13.0,,deliver after 6pm (gift),750.84,411.18
+ORD-0037,2024/08/28,SOUTH,app,61.23,29,2.0,2.0, gift wrap requested ,2313.51,1344.43
+ORD-0038,2024/01/26,North,store,138.48,7,10.0,1.0,bulk order - confirmed,2201.87,1298.32
+ORD-0039,2024/07/24,East,web,25.47,6,5.0,4.0,signature required,1067.41,595.48
+ORD-0040,2024/07/15,West,store,121.67,1,3.0,3.0,sample included,810.82,449.39
+ORD-0041,2024/07/28,South,web,30.23,5,13.0,1.0,standard delivery (gift),1302.89,785.11
+ORD-0042,2024/04/10,East,store,113.81,5,,5.0,invoice separately,1757.69,991.52
+ORD-0043,2024/10/01,North,store,24.1,5,,2.0,signature required,616.33,370.35
+ORD-0044,2024/12/02,South,store,95.62,-999,,4.0,standard delivery,429.83,263.19
+ORD-0045,2024/03/22,EAST,web,101.29,12,3.0,3.0,   ,693.09,384.28
+ORD-0046,2024/08/01,West,web,28.78,25,3.0,2.0,leave at front desk,804.2,467.43
+ORD-0047,2024/02/07,East,app,241.14,1,6.0,5.0,invoice separately,791.33,518.0
+ORD-0048,2024/05/19,South,store,17.9,28,5.0,5.0,gift wrap requested,1601.77,915.49
+ORD-0049,2024/11/10,North,store,41.4,9,,3.0,expedite shipping (gift),177.83,113.85
+ORD-0050,2024/09/06,West,web,266.65,14,11.0,2.0,gift wrap requested (gift),697.9,442.79
+ORD-0051,2024/02/22,south,web,61.32,26,9.0,2.0,fragile items included,1024.54,560.83
+ORD-0052,2024/10/28,East,app,191.23,27,1.0,2.0,no weekend delivery,1156.86,674.05
+ORD-0053,2024/02/12,South,app,77.03,21,9.0,2.0,vip customer - priority,1965.2,1142.1
+ORD-0054,2024/07/03,South,web,85.43,13,6.0,4.0,sample included,900.92,548.13
+ORD-0055,2024/09/12,NORTH,app,75.97,25,7.0,4.0,call before delivery,537.02,280.77
+ORD-0056,2024/05/03,South,store,18.46,6,2.0,4.0,vip customer,454.78,263.19
+ORD-0057,2024/08/10,West,app,150.78,17,8.0,,standard delivery,979.88,584.31
+ORD-0058,2024/09/25,South,store,56.8,24,6.0,2.0,repeat buyer - priority,565.04,305.1
+ORD-0059,2024/11/12,EAST,web,209.83,29,2.0,5.0,no weekend delivery (repeat),2886.03,1698.3
+ORD-0060,2024/04/06,North,app,35.92,0,2.0,4.0,leave at front desk (gift),886.25,505.85
+ORD-0061,2024/09/27,West,store,238.26,29,5.0,1.0,checked and verified,1486.94,848.76
+ORD-0062,2024/01/02,East,web,262.64,20,14.0,,updated shipping address,1062.02,610.43
+ORD-0063,2024/01/08,North,web,191.99,13,2.0,5.0,signature required (vip),1896.61,1050.12
+ORD-0064,2024/09/25,east,web,52.86,16,11.0,4.0,leave at front desk - confirmed,2248.84,1340.37
+ORD-0065,2024/01/09,South,web,90.02,-999,9.0,5.0,leave at front desk,1655.86,939.34
+ORD-0066,2024/04/28,East,web,192.09,18,8.0,1.0,leave at front desk (gift),1171.69,755.21
+ORD-0067,2024/09/08,East,web,90.92,6,14.0,5.0,expedite shipping,1650.67,896.76
+ORD-0068,2024/03/18,South,store,41.59,9,,4.0,sample included - confirmed,991.79,593.25
+ORD-0069,2024/09/25,North,web,56.01,13,9.0,1.0,return label enclosed (repeat),394.03,269.32
+ORD-0070,2024/08/03,North,web,47.71,30,10.0,3.0,updated shipping address,1361.52,788.69
+ORD-0071,2024/09/29,EAST,store,180.26,6,8.0,2.0,call before delivery,389.88,185.3
+ORD-0072,2024/10/07,North,app,73.06,30,9.0,1.0,invoice separately (repeat),583.31,320.17
+ORD-0073,2024/02/26,NORTH,app,74.54,19,5.0,4.0,"customer called, confirmed address (gift)",824.33,499.94
+ORD-0074,2024/09/09,North,store,54.09,17,2.0,,bulk order - confirmed,1789.69,1017.88
+ORD-0075,2024/08/30,south,web,43.43,0,3.0,4.0,fragile items included,1022.39,557.97
+ORD-0076,2024/03/17,North,store,60.6,6,,4.0,deliver after 6pm,271.09,192.9
+ORD-0077,2024/02/26,West,web,231.27,20,14.0,1.0,sample included - confirmed,901.29,536.49
+ORD-0078,2024/07/31,west,web,26.66,24,13.0,,partial shipment ok (repeat),867.11,483.46
+ORD-0079,2024/04/13,NORTH,web,66.6,18,5.0,1.0," customer called, confirmed address (vip) ",760.24,464.55
+ORD-0080,2024/06/30,South,store,67.08,23,10.0,5.0, fragile items included (repeat) ,426.17,281.77
+ORD-0081,2024/05/02,south,web,159.46,14,12.0,2.0,updated shipping address,595.7,365.83
+ORD-0082,2024/01/28,North,web,29.84,17,5.0,4.0,"customer called, confirmed address",421.51,217.53
+ORD-0083,2024/10/06,North,web,149.85,4,10.0,5.0, fragile items included ,492.68,273.8
+ORD-0084,2024/11/26,North,web,128.9,24,14.0,3.0,   ,1157.76,658.28
+ORD-0085,2024/12/03,West,store,180.47,24,,5.0,vip customer,1106.97,625.88
+ORD-0086,2024/09/28,East,store,54.67,29,14.0,,fragile items included - priority,543.52,341.42
+ORD-0087,2024/04/18,east,web,204.48,23,8.0,3.0,no weekend delivery,479.35,324.03
+ORD-0088,2024/01/11,WEST,store,37.56,16,12.0,2.0,   ,733.23,416.26
+ORD-0089,2024/03/16,West,app,164.04,19,8.0,3.0, expedite shipping ,1647.18,939.15
+ORD-0090,2024/03/15,North,store,33.52,14,9.0,2.0,checked and verified (vip),546.24,327.13
+ORD-0091,2024/12/11,East,app,148.87,21,7.0,5.0,sample included,1154.69,751.36
+ORD-0092,2024/08/27,West,app,96.6,13,,4.0,repeat buyer,576.32,346.12
+ORD-0093,2024/01/08,East,app,736.06,7,2.0,1.0,standard delivery,1796.72,1060.96
+ORD-0094,2024/03/07,North,web,342.6,16,9.0,4.0,fragile items included,769.56,480.54
+ORD-0095,2024/05/15,South,store,56.78,26,2.0,2.0,signature required,387.12,228.49
+ORD-0096,2024/05/13,North,store,58.75,10,6.0,2.0,   ,604.36,358.81
+ORD-0097,2024/09/17,north,store,126.15,2,,3.0,"rush, ship today",358.41,182.34
+ORD-0098,2024/08/10,North,store,100.02,-999,10.0,5.0,partial shipment ok,1051.66,631.26
+ORD-0099,2024/05/02,East,web,7.71,0,7.0,3.0,expedite shipping,397.93,241.97
+ORD-0100,2024/12/05,West,store,58.02,25,6.0,5.0,"rush, ship today (repeat)",2196.52,1265.49
+ORD-0101,2024/11/24,North,app,69.68,12,2.0,1.0,fragile items included (repeat),1211.37,691.13
+ORD-0102,2024/11/24,South,web,120.83,3,4.0,2.0,repeat buyer,584.94,303.57
+ORD-0103,2024/09/29,South,web,164.42,4,3.0,2.0,return label enclosed (repeat),453.25,230.56
+ORD-0104,2024/03/11,WEST,web,23501.25,2,7.0,2.0,repeat buyer,2008.72,1181.18
+ORD-0105,2024/10/12,East,web,62.59,7,4.0,2.0,expedite shipping (vip),806.77,485.48
+ORD-0106,2024/01/12,North,web,163.12,23,12.0,1.0,return label enclosed,1259.6,737.62
+ORD-0107,2024/04/01,North,store,76.84,27,1.0,,call before delivery,3313.32,1905.71
+ORD-0108,2024/08/11,South,store,192.1,24,7.0,2.0,expedite shipping,996.08,613.33
+ORD-0109,2024/03/22,North,web,120.74,22,13.0,1.0,vip customer,828.94,475.91
+ORD-0110,2024/05/01,North,web,225.27,11,11.0,3.0,leave at front desk (vip),478.17,260.73
+ORD-0111,2024/10/18,South,web,82.85,11,5.0,3.0, invoice separately - priority ,370.07,218.25
+ORD-0112,2024/02/24,East,web,436.46,1,,3.0,sample included,288.27,181.83
+ORD-0113,2024/03/09,East,web,112.91,1,2.0,5.0,checked and verified (gift),1788.35,1030.71
+ORD-0114,2024/01/01,South,web,192.05,29,3.0,2.0,call before delivery,699.17,400.27
+ORD-0115,2024/04/16,South,store,85.0,24,13.0,2.0,vip customer,1708.65,1028.13
+ORD-0116,2024/09/27,East,app,449.88,7,3.0,3.0,"rush, ship today (repeat)",430.48,238.04
+ORD-0117,2024/06/18,East,web,80.23,19,14.0,,expedite shipping,872.19,517.41
+ORD-0118,2024/01/07,NORTH,app,112.28,20,3.0,5.0,invoice separately,708.12,410.03
+ORD-0119,2024/10/14,South,web,209.3,2,5.0,2.0,"rush, ship today - confirmed",754.42,488.36
+ORD-0120,2024/06/16,South,web,51.62,3,1.0,5.0,expedite shipping,875.36,491.7
+ORD-0121,2024/11/10,South,app,138.49,16,4.0,1.0,vip customer,622.34,329.43
+ORD-0122,2024/12/17,North,web,326.72,22,10.0,,gift wrap requested,463.48,262.71
+ORD-0123,2024/09/20,NORTH,app,203.22,18,3.0,1.0,call before delivery (vip),1402.76,791.28
+ORD-0124,2024/07/15,SOUTH,app,49.53,2,14.0,5.0,bulk order,1077.65,639.82
+ORD-0125,2024/06/26,west,app,179.51,15,,2.0, return label enclosed ,1027.31,604.05
+ORD-0126,2024/11/07,South,web,31.4,12,6.0,5.0,call before delivery (repeat),1492.06,892.24
+ORD-0127,2024/06/16,West,store,165.47,2,,1.0,no weekend delivery,749.86,424.51
+ORD-0128,2024/11/07,North,web,17.92,12,10.0,3.0,return label enclosed,1856.99,1073.84
+ORD-0129,2024/09/02,West,web,328.58,8,,3.0,"customer called, confirmed address - confirmed",611.93,359.63
+ORD-0130,2024/10/09,West,app,169.99,29,11.0,5.0, call before delivery - confirmed ,993.38,564.08
+ORD-0131,2024/09/24,East,web,25.97,6,,2.0,call before delivery - confirmed,1767.12,1021.85
+ORD-0132,2024/05/23,North,web,39.79,6,5.0,2.0,no weekend delivery (repeat),438.2,296.87
+ORD-0133,2024/07/04,North,web,53.89,13,6.0,2.0,updated shipping address,1051.16,637.33
+ORD-0134,2024/03/17,West,store,81.12,16,12.0,5.0,standard delivery,1336.8,766.1
+ORD-0135,2024/12/14,South,store,51.25,22,1.0,2.0,checked and verified,522.79,317.74
+ORD-0136,2024/09/20,East,store,8.38,2,14.0,,repeat buyer - confirmed,993.88,547.22
+ORD-0137,2024/05/11,North,app,77.02,13,7.0,5.0,"customer called, confirmed address - confirmed",355.1,203.89
+ORD-0138,2024/02/10,East,store,641.13,18,7.0,2.0,invoice separately,1208.49,691.88
+ORD-0139,2024/04/24,West,web,162.97,22,11.0,1.0,no weekend delivery,1027.78,610.1
+ORD-0140,2024/05/19,South,store,39.52,11,5.0,3.0,invoice separately,827.38,484.9
+ORD-0141,2024/09/25,East,web,93.48,19,10.0,3.0,return label enclosed (vip),473.29,294.82
+ORD-0142,2024/06/24,EAST,web,95.14,7,10.0,4.0,checked and verified,942.01,522.85
+ORD-0143,2024/01/16,West,app,274.85,27,7.0,2.0,updated shipping address,769.53,463.07
+ORD-0144,2024/07/15,SOUTH,web,61.31,1,4.0,2.0,"customer called, confirmed address",882.25,522.72
+ORD-0145,2024/04/19,West,web,49.62,13,,5.0,gift wrap requested,2144.93,1260.41
+ORD-0146,2024/10/28,South,web,23.87,1,6.0,3.0,"rush, ship today",2632.51,1517.62
+ORD-0147,2024/06/26,South,store,134.83,2,11.0,4.0,leave at front desk,1498.11,893.47
+ORD-0148,2024/04/07,West,web,365.33,7,10.0,3.0,no weekend delivery,761.99,408.67
+ORD-0149,2024/03/20,East,app,23.42,30,2.0,3.0,leave at front desk,857.44,518.11
+ORD-0150,2024/12/17,NORTH,app,126.18,15,,4.0,partial shipment ok,880.92,512.53
+ORD-0151,2024/09/07,East,app,207.89,10,6.0,4.0,signature required,176.31,94.91
+ORD-0152,2024/04/06,North,store,295.77,15,10.0,4.0,no weekend delivery,1213.61,696.65
+ORD-0153,2024/07/09,North,store,633.32,1,11.0,3.0,leave at front desk (vip),650.83,342.35
+ORD-0154,2024/01/23,North,web,94.32,12,10.0,1.0,partial shipment ok,443.77,269.34
+ORD-0155,2024/03/02,East,store,38.02,30,1.0,,return label enclosed - priority,465.0,282.21
+ORD-0156,2024/01/13,East,app,82.08,19,1.0,3.0,"rush, ship today - confirmed",385.97,247.0
+ORD-0157,2024/07/06,North,app,13.82,26,10.0,4.0,"rush, ship today (gift)",1787.65,1045.91
+ORD-0158,2024/04/10,North,web,24.14,28,,3.0," customer called, confirmed address - confirmed ",772.86,447.02
+ORD-0159,2024/04/14,South,web,110.36,25,3.0,3.0,invoice separately,953.39,557.57
+ORD-0160,2024/04/01,South,web,20.65,0,10.0,5.0,standard delivery (repeat),836.78,478.76
+ORD-0161,2024/11/07,East,web,81.13,24,14.0,5.0,signature required - priority,370.14,222.18
+ORD-0162,2024/02/05,West,app,122.14,19,10.0,1.0,repeat buyer,1477.37,872.89
+ORD-0163,2024/03/15,West,web,14.28,3,2.0,2.0,call before delivery,294.0,162.67
+ORD-0164,2024/05/24,East,app,67.41,20,14.0,3.0,expedite shipping,1304.84,729.0
+ORD-0165,2024/11/21,SOUTH,web,88.51,7,14.0,2.0,deliver after 6pm,641.03,374.27
+ORD-0166,2024/08/24,North,web,92.57,5,,5.0,"rush, ship today - priority",474.04,285.73
+ORD-0167,2024/08/05,north,store,47.25,27,5.0,2.0,leave at front desk (repeat),1699.76,969.16
+ORD-0168,2024/06/05,South,web,56.42,11,11.0,4.0,leave at front desk - priority,1305.79,745.98
+ORD-0169,2024/10/26,SOUTH,store,284.48,26,11.0,1.0,gift wrap requested,254.26,167.38
+ORD-0170,2024/08/07,South,app,20.97,30,4.0,,return label enclosed,1029.31,569.77
+ORD-0171,2024/07/06,north,store,39.77,19,14.0,2.0,signature required,429.73,222.79
+ORD-0172,2024/02/11,West,app,153.36,9,6.0,5.0,repeat buyer,489.87,306.42
+ORD-0173,2024/04/13,East,web,39.16,20,,3.0,return label enclosed,1124.06,603.06
+ORD-0174,2024/10/18,EAST,app,58.08,6,4.0,1.0,repeat buyer,1322.43,740.24
+ORD-0175,2024/07/19,west,app,20.74,2,11.0,1.0,gift wrap requested,1124.89,698.62
+ORD-0176,2024/09/15,South,store,86.93,27,3.0,4.0,checked and verified (repeat),821.76,481.77
+ORD-0177,2024/02/24,East,app,119.17,24,7.0,4.0,"rush, ship today (repeat)",915.0,532.81
+ORD-0178,2024/02/13,North,store,24.69,15,1.0,1.0,sample included (gift),1240.67,680.59
+ORD-0179,2024/05/24,North,store,61.2,23,5.0,3.0,bulk order (repeat),418.94,218.02
+ORD-0180,2024/10/25,North,web,147.47,30,4.0,3.0,deliver after 6pm,718.28,409.78
+ORD-0181,2024/02/21,North,store,27.77,0,,3.0,expedite shipping - confirmed,902.81,489.98
+ORD-0182,2024/05/07,South,store,196.61,8,10.0,5.0,return label enclosed,452.53,270.77
+ORD-0183,2024/12/09,East,web,113.73,25,,4.0,call before delivery,1263.19,727.72
+ORD-0184,2024/11/06,West,store,121.25,19,9.0,4.0,updated shipping address,507.92,292.98
+ORD-0185,2024/10/14,North,app,43.12,-999,12.0,4.0,checked and verified (gift),2130.21,1205.89
+ORD-0186,2024/08/26,East,store,482.7,17,11.0,4.0,deliver after 6pm,568.67,340.23
+ORD-0187,2024/12/15,EAST,app,48.25,25,12.0,2.0,   ,1459.08,856.01
+ORD-0188,2024/10/12,North,store,90.42,3,7.0,3.0,signature required (vip),521.57,312.75
+ORD-0189,2024/01/29,south,app,292.86,1,7.0,3.0,call before delivery (repeat),1086.06,617.8
+ORD-0190,2024/10/16,North,store,191.43,30,1.0,3.0,signature required (vip),1689.79,1038.89
+ORD-0191,2024/05/03,South,web,34.6,23,9.0,4.0,vip customer (repeat),1097.97,583.99
+ORD-0192,2024/04/03,north,store,32.98,16,7.0,5.0,expedite shipping,1134.2,634.7
+ORD-0193,2024/06/19,North,store,15.96,2,1.0,3.0,bulk order - confirmed,781.54,458.63
+ORD-0194,2024/07/07,North,store,51.83,3,6.0,4.0,standard delivery,529.49,296.49
+ORD-0195,2024/04/08,East,store,91.57,9,12.0,5.0,invoice separately,463.5,253.2
+ORD-0196,2024/08/27,South,store,39.99,3,10.0,4.0,leave at front desk,477.68,257.81
+ORD-0197,2024/04/25,South,app,196.9,4,11.0,,bulk order,766.7,452.81
+ORD-0198,2024/09/18,North,web,22.24,28,,5.0,signature required,400.21,265.16
+ORD-0199,2024/09/29,East,app,51.11,23,1.0,5.0,return label enclosed (vip),1434.14,801.41
+ORD-0200,2024/04/06,South,store,28.91,-999,7.0,2.0,partial shipment ok,2917.83,1685.14
+ORD-0201,2024/12/02,West,web,158.38,1,9.0,3.0,standard delivery - priority,1079.44,633.72
+ORD-0202,2024/06/28,South,store,82.6,30,8.0,5.0,"rush, ship today",2000.43,1135.37
+ORD-0203,2024/07/25,East,store,18079.64,15,1.0,5.0,partial shipment ok (vip),305.81,241.85
+ORD-0204,2024/01/16,SOUTH,web,70.32,11,11.0,3.0,bulk order - confirmed,485.39,315.06
+ORD-0205,2024/08/11,NORTH,store,361.39,0,13.0,3.0,checked and verified - confirmed,682.76,367.21
+ORD-0206,2024/08/25,West,app,210.94,22,7.0,5.0,invoice separately,723.19,434.03
+ORD-0207,2024/06/22,West,web,47.11,3,10.0,1.0,sample included,1081.77,620.76
+ORD-0208,2024/04/21,North,store,66.31,15,7.0,5.0,bulk order (repeat),1011.43,628.24
+ORD-0209,2024/02/01,East,store,178.11,20,12.0,3.0,return label enclosed (repeat),2223.53,1277.35
+ORD-0210,2024/06/12,South,web,24.93,24,12.0,2.0,"customer called, confirmed address",653.67,381.56
+ORD-0211,2024/05/31,south,web,220.42,8,8.0,2.0,partial shipment ok,165.17,82.1
+ORD-0212,2024/04/07,North,store,19.8,11,2.0,4.0,partial shipment ok,1632.6,943.31
+ORD-0213,2024/10/20,SOUTH,store,20.35,1,10.0,3.0,gift wrap requested,635.17,449.41
+ORD-0214,2024/09/08,North,store,99.15,6,3.0,4.0,updated shipping address (gift),1442.17,861.79
+ORD-0215,2024/11/18,West,web,42.36,22,14.0,2.0,fragile items included,1261.93,709.27
+ORD-0216,2024/04/26,North,store,32.54,5,,4.0,partial shipment ok (repeat),987.6,597.21
+ORD-0217,2024/10/11,South,web,101.59,26,2.0,3.0,repeat buyer,575.65,342.92
+ORD-0218,2024/08/28,NORTH,web,122.37,13,,4.0,invoice separately,1808.95,1021.63
+ORD-0219,2024/04/28,West,store,341.3,6,8.0,4.0,fragile items included,1153.47,683.65
+ORD-0220,2024/02/23,East,app,21.28,23,14.0,1.0,invoice separately,850.07,522.35
+ORD-0221,2024/05/18,West,store,154.5,17,5.0,4.0," rush, ship today - confirmed ",1913.3,1075.67
+ORD-0222,2024/01/02,south,web,92.11,11,,2.0,   ,394.38,267.69
+ORD-0223,2024/05/29,East,web,95.74,28,5.0,4.0,signature required - confirmed,207.46,133.43
+ORD-0224,2024/12/20,East,web,19.26,16,5.0,4.0,expedite shipping,987.76,560.53
+ORD-0225,2024/09/21,West,web,42.92,10,,3.0,   ,456.61,259.9
+ORD-0226,2024/08/11,South,app,130.68,8,4.0,2.0,call before delivery,724.5,441.76
+ORD-0227,2024/03/09,West,web,25.48,6,6.0,5.0,return label enclosed,1529.96,911.46
+ORD-0228,2024/10/17,SOUTH,web,41.7,23,5.0,3.0,return label enclosed - priority,316.86,133.42
+ORD-0229,2024/02/29,South,web,154.9,18,5.0,5.0,standard delivery,400.1,251.26
+ORD-0230,2024/03/24,SOUTH,web,52.76,24,4.0,,repeat buyer,1245.55,739.56
+ORD-0231,2024/01/19,West,store,92.94,29,8.0,3.0,bulk order,1334.48,732.23
+ORD-0232,2024/07/06,South,app,93.65,13,3.0,1.0,"rush, ship today",462.42,292.7
+ORD-0233,2024/12/11,South,store,62.7,16,12.0,1.0,no weekend delivery,446.06,290.78
+ORD-0234,2024/05/28,North,app,96.07,22,13.0,4.0,repeat buyer,1508.08,887.33
+ORD-0235,2024/10/13,East,store,23.74,25,5.0,3.0,return label enclosed (vip),664.83,383.57
+ORD-0236,2024/10/07,north,web,91.81,1,7.0,3.0,updated shipping address - priority,1022.46,576.78
+ORD-0237,2024/02/23,SOUTH,app,49.58,4,14.0,5.0,sample included,559.69,346.12
+ORD-0238,2024/11/28,West,web,186.88,12,3.0,3.0,expedite shipping,1328.37,727.96
+ORD-0239,2024/12/04,North,web,19190.86,19,3.0,4.0,gift wrap requested,911.22,563.71
+ORD-0240,2024/10/12,South,app,79.45,13,4.0,1.0,standard delivery (repeat),1654.21,947.93
+ORD-0241,2024/10/04,North,web,60.65,29,3.0,2.0,vip customer,1259.89,748.14
+ORD-0242,2024/07/01,North,store,73.81,29,4.0,5.0,"rush, ship today",1271.01,766.06
+ORD-0243,2024/08/18,East,web,78.96,10,12.0,4.0,deliver after 6pm,1066.97,602.64
+ORD-0244,2024/01/07,North,store,41.93,18,14.0,4.0, return label enclosed (vip) ,1119.85,659.61
+ORD-0245,2024/01/05,South,store,52.73,4,9.0,1.0,fragile items included,1027.24,630.23
+ORD-0246,2024/11/17,West,store,54.54,4,5.0,2.0,leave at front desk,989.21,578.9
+ORD-0247,2024/03/20,West,app,167.21,24,,3.0,partial shipment ok - confirmed,589.62,337.32
+ORD-0248,2024/11/20,SOUTH,app,60.86,0,7.0,1.0,signature required - confirmed,1461.79,854.28
+ORD-0249,2024/05/21,East,store,34.4,20,,4.0,"customer called, confirmed address (vip)",1628.86,996.73
+ORD-0250,2024/09/08,East,store,76.15,8,,2.0,gift wrap requested - confirmed,611.33,435.46
+ORD-0251,2024/02/09,South,web,50.38,9,14.0,1.0,repeat buyer,1051.52,636.82
+ORD-0252,2024/11/05,East,web,231.92,27,12.0,4.0,bulk order,674.29,332.42
+ORD-0253,2024/05/04,WEST,store,36.35,8,4.0,,checked and verified,1682.07,1014.44
+ORD-0254,2024/08/29,West,app,147.64,8,3.0,3.0,return label enclosed,573.03,301.81
+ORD-0255,2024/04/20,East,store,77.05,22,10.0,5.0,"rush, ship today",1225.85,699.88
+ORD-0256,2024/01/15,South,web,81.25,5,5.0,3.0,sample included (vip),540.95,296.9
+ORD-0257,2024/11/16,North,app,63.59,19,3.0,1.0,bulk order,1794.59,1073.9
+ORD-0258,2024/01/25,South,app,469.62,0,,1.0,   ,990.86,562.35
+ORD-0259,2024/10/14,NORTH,web,124.69,12,1.0,1.0,partial shipment ok (repeat),1748.62,1005.72
+ORD-0260,2024/07/21,South,web,64.28,13,3.0,5.0,"rush, ship today (gift)",736.3,413.99
+ORD-0261,2024/06/29,SOUTH,app,64.52,3,,2.0,signature required - confirmed,717.74,362.5
+ORD-0262,2024/03/08,East,web,155.58,20,6.0,3.0,leave at front desk,705.23,408.05
+ORD-0263,2024/02/18,North,web,228.41,13,4.0,3.0,deliver after 6pm - confirmed,1669.81,921.47
+ORD-0264,2024/05/21,North,app,226.48,23,,3.0,expedite shipping (repeat),1377.0,830.94
+ORD-0265,2024/09/28,East,app,184.23,10,14.0,2.0,call before delivery,2597.3,1519.98
+ORD-0266,2024/12/10,North,web,148.03,22,11.0,5.0,expedite shipping,1086.63,660.78
+ORD-0267,2024/04/06,North,web,14.1,0,2.0,1.0,partial shipment ok (gift),842.14,498.71
+ORD-0268,2024/03/05,West,web,43.3,23,14.0,5.0,partial shipment ok (repeat),913.71,534.81
+ORD-0269,2024/04/07,NORTH,app,103.92,5,5.0,2.0,gift wrap requested,1206.7,703.7
+ORD-0270,2024/04/12,South,store,303.2,18,7.0,5.0,repeat buyer (gift),3918.32,2249.66
+ORD-0271,2024/04/03,North,app,58.54,15,,4.0,partial shipment ok,890.6,520.0
+ORD-0272,2024/05/26,North,app,183.9,-999,4.0,5.0,vip customer (repeat),777.03,443.8
+ORD-0273,2024/02/25,South,store,121.57,29,14.0,,repeat buyer - priority,1695.83,961.0
+ORD-0274,2024/07/24,EAST,store,127.65,22,1.0,2.0,call before delivery,1473.49,866.7
+ORD-0275,2024/02/16,South,store,221.21,13,10.0,5.0,updated shipping address (vip),614.33,360.17
+ORD-0276,2024/04/16,West,store,58.83,11,10.0,4.0,no weekend delivery,1272.89,687.61
+ORD-0277,2024/12/15,North,web,62.9,19,,2.0,sample included,624.36,357.91
+ORD-0278,2024/08/14,south,web,132.33,1,11.0,2.0,repeat buyer,4078.61,2358.61
+ORD-0279,2024/06/25,North,app,199.48,4,3.0,1.0,"rush, ship today",2270.24,1318.89
+ORD-0280,2024/11/27,East,store,87.53,26,12.0,2.0,partial shipment ok (gift),2105.28,1161.9
+ORD-0281,2024/11/27,West,store,146.72,26,,,no weekend delivery,923.22,497.4
+ORD-0282,2024/10/15,North,web,78.06,25,11.0,4.0,updated shipping address,1104.43,650.48
+ORD-0283,2024/05/24,North,web,25.89,28,10.0,1.0,updated shipping address (gift),677.94,421.21
+ORD-0284,2024/02/29,South,app,94.93,30,7.0,2.0,sample included,1075.06,649.76
+ORD-0285,2024/04/26,East,store,447.74,29,9.0,4.0,signature required (vip),614.72,364.0
+ORD-0286,2024/08/02,North,web,45.22,0,9.0,,expedite shipping (repeat),607.79,330.55
+ORD-0287,2024/12/05,South,app,67.65,5,10.0,4.0,updated shipping address,691.51,374.44
+ORD-0288,2024/03/08,north,store,139.06,28,14.0,,   ,801.42,488.89
+ORD-0289,2024/07/01,North,app,200.14,5,11.0,2.0,return label enclosed,2153.14,1225.93
+ORD-0290,2024/01/20,South,store,237.19,11,14.0,,leave at front desk (vip),1834.28,1067.77
+ORD-0291,2024/05/09,North,store,126.21,18,4.0,5.0,deliver after 6pm (gift),1627.8,934.19
+ORD-0292,2024/12/06,North,store,112.33,18,11.0,1.0,updated shipping address (vip),1409.44,843.0
+ORD-0293,2024/09/21,North,web,57.84,24,13.0,,partial shipment ok (gift),684.2,391.65
+ORD-0294,2024/04/09,East,app,49.85,14,,,call before delivery,752.81,437.7
+ORD-0295,2024/02/04,WEST,web,90.72,20,2.0,1.0,updated shipping address (gift),1188.56,628.62
+ORD-0296,2024/12/16,North,store,42.48,15,6.0,2.0,"customer called, confirmed address",531.35,294.68
+ORD-0297,2024/03/24,North,app,74.62,5,1.0,3.0,sample included,528.0,305.4
+ORD-0298,2024/07/17,South,web,1436.38,16,2.0,2.0,deliver after 6pm,653.41,384.97
+ORD-0299,2024/08/05,south,store,9.57,27,,3.0,standard delivery,649.06,370.4
+ORD-0300,2024/07/10,East,web,105.32,15,4.0,1.0,checked and verified (vip),1020.89,595.76
+ORD-0301,2024/03/03,North,app,52.35,6,8.0,2.0,partial shipment ok,997.36,557.8
+ORD-0302,2024/03/29,East,web,45.0,3,9.0,5.0,partial shipment ok,793.18,471.6
+ORD-0303,2024/04/09,West,store,126.19,30,12.0,3.0,return label enclosed (gift),1640.26,978.21
+ORD-0304,2024/11/18,West,store,82.31,8,,,signature required - priority,1604.79,907.09
+ORD-0305,2024/02/16,South,store,41.33,12,11.0,2.0,expedite shipping,1971.24,1188.21
+ORD-0306,2024/09/23,North,store,36.29,6,4.0,3.0,   ,951.77,533.75
+ORD-0307,2024/10/30,South,web,122.31,6,12.0,3.0,deliver after 6pm,1120.73,654.03
+ORD-0308,2024/09/30,South,store,42.51,6,1.0,3.0,"rush, ship today",1860.8,1070.75
+ORD-0309,2024/05/19,South,store,101.0,11,1.0,3.0,call before delivery (repeat),1971.62,1175.82
+ORD-0310,2024/09/22,South,web,133.56,7,8.0,4.0,checked and verified (repeat),744.55,465.74
+ORD-0311,2024/04/06,North,store,23.11,2,2.0,,no weekend delivery (gift),614.98,308.3
+ORD-0312,2024/11/15,South,app,910.68,26,,4.0,"customer called, confirmed address - confirmed",869.64,522.97
+ORD-0313,2024/03/24,West,web,160.66,4,7.0,3.0,vip customer - confirmed,848.37,437.45
+ORD-0314,2024/11/22,North,web,98.39,30,7.0,5.0,standard delivery,1003.68,566.67
+ORD-0315,2024/03/21,North,store,172.12,28,10.0,5.0,return label enclosed - confirmed,1587.16,939.83
+ORD-0316,2024/05/18,North,web,75.22,10,5.0,,gift wrap requested,405.42,264.72
+ORD-0317,2024/11/07,South,app,357.51,22,4.0,1.0,updated shipping address (gift),1903.35,1118.22
+ORD-0318,2024/10/05,NORTH,web,79.14,26,8.0,5.0,partial shipment ok,429.91,247.49
+ORD-0319,2024/06/02,SOUTH,web,216.71,15,2.0,2.0,deliver after 6pm - priority,1037.97,638.16
+ORD-0320,2024/03/16,South,store,18.09,0,,1.0,partial shipment ok,1033.18,612.23
+ORD-0321,2024/08/26,East,web,124.83,4,3.0,4.0,return label enclosed (repeat),714.17,449.19
+ORD-0322,2024/09/28,East,app,34.55,18,12.0,1.0,signature required,1000.07,610.52
+ORD-0323,2024/08/12,South,store,78.59,29,3.0,2.0,"customer called, confirmed address - confirmed",881.54,472.14
+ORD-0324,2024/09/26,East,web,1009.64,4,6.0,4.0,call before delivery,1066.32,573.14
+ORD-0325,2024/05/19,EAST,web,177.16,12,14.0,4.0,call before delivery (repeat),767.56,506.87
+ORD-0326,2024/06/25,North,store,167.25,3,4.0,2.0,standard delivery,524.47,274.75
+ORD-0327,2024/10/29,NORTH,app,43.59,20,6.0,2.0,deliver after 6pm (vip),1486.68,855.4
+ORD-0328,2024/12/08,South,web,137.61,30,14.0,2.0,"customer called, confirmed address",1193.89,702.67
+ORD-0329,2024/05/31,East,store,74.53,7,5.0,3.0,standard delivery,3337.66,1947.09
+ORD-0330,2024/05/19,East,store,10.49,2,13.0,,gift wrap requested,1976.72,1159.44
+ORD-0331,2024/05/27,East,app,54.58,2,13.0,3.0,updated shipping address (gift),1077.94,610.73
+ORD-0332,2024/11/09,East,app,22.92,23,9.0,1.0,repeat buyer,4123.21,2329.14
+ORD-0333,2024/12/12,NORTH,web,68.3,11,3.0,,leave at front desk - confirmed,585.6,340.39
+ORD-0334,2024/08/16,West,store,178.14,24,12.0,5.0,fragile items included,1028.13,599.53
+ORD-0335,2024/02/09,South,web,110.08,25,9.0,3.0,return label enclosed,918.64,512.6
+ORD-0336,2024/08/07,North,store,115.54,21,2.0,5.0,bulk order,1332.46,795.14
+ORD-0337,2024/11/04,East,app,213.88,22,8.0,5.0,vip customer,837.16,499.49
+ORD-0338,2024/03/03,East,store,19.48,12,10.0,5.0,"customer called, confirmed address",570.72,341.03
+ORD-0339,2024/04/12,West,web,16668.46,8,4.0,5.0,   ,495.28,277.49
+ORD-0340,2024/02/19,South,store,25.93,12,1.0,4.0,partial shipment ok (repeat),1219.21,695.61
+ORD-0341,2024/08/22,South,app,204.59,14,,2.0,bulk order - confirmed,1450.91,854.64
+ORD-0342,2024/07/09,West,store,37.18,16,,1.0,return label enclosed (gift),2353.04,1373.64
+ORD-0343,2024/04/05,West,web,44.21,23,9.0,3.0,standard delivery,523.09,306.93
+ORD-0344,2024/07/10,North,app,40.06,29,14.0,1.0,   ,516.85,254.18
+ORD-0345,2024/06/19,North,app,125.99,7,7.0,2.0,standard delivery (repeat),629.57,325.37
+ORD-0346,2024/04/01,South,web,405.83,10,9.0,1.0,invoice separately (vip),661.51,402.17
+ORD-0347,2024/09/29,East,web,66.55,13,11.0,4.0,fragile items included,1241.7,705.67
+ORD-0348,2024/10/30,west,web,226.88,20,9.0,5.0,sample included,1400.23,814.4
+ORD-0349,2024/04/14,East,app,76.98,21,7.0,4.0,"rush, ship today",1759.18,1043.78
+ORD-0350,2024/05/28,North,store,52.11,14,12.0,4.0,partial shipment ok,2088.25,1236.85
+ORD-0351,2024/05/10,East,web,21.55,4,1.0,3.0,updated shipping address - confirmed,747.86,444.41
+ORD-0352,2024/10/12,North,web,25.85,17,11.0,,repeat buyer,2184.86,1257.86
+ORD-0353,2024/12/09,West,web,54.12,2,9.0,3.0,updated shipping address,1601.43,898.96
+ORD-0354,2024/08/16,South,app,37.88,27,5.0,4.0,call before delivery - confirmed,1225.26,737.62
+ORD-0355,2024/03/26,North,web,973.87,22,2.0,,checked and verified,1227.63,704.73
+ORD-0356,2024/07/07,WEST,store,102.48,6,6.0,5.0,standard delivery,739.81,396.83
+ORD-0357,2024/12/03,North,store,209.29,14,13.0,2.0,fragile items included,581.88,336.79
+ORD-0358,2024/07/26,North,web,67.36,28,5.0,1.0,"rush, ship today (vip)",1464.41,862.91
+ORD-0359,2024/04/21,East,app,100.5,28,10.0,1.0,updated shipping address,1852.12,1067.05
+ORD-0360,2024/04/20,North,web,61.33,12,2.0,2.0,bulk order (vip),1223.84,664.77
+ORD-0361,2024/12/05,North,app,109.99,27,11.0,2.0,leave at front desk (vip),586.2,326.19
+ORD-0362,2024/09/06,North,store,72.57,20,,1.0,signature required (vip),2343.2,1295.82
+ORD-0363,2024/10/08,West,web,56.01,14,11.0,3.0,sample included,944.23,533.54
+ORD-0364,2024/01/06,North,app,18.33,4,12.0,4.0,   ,715.78,434.31
+ORD-0365,2024/05/07,East,app,23.53,8,4.0,4.0,"rush, ship today",735.23,445.51
+ORD-0366,2024/01/06,North,store,53.06,13,5.0,5.0,partial shipment ok,1850.5,1082.79
+ORD-0367,2024/06/20,North,web,53.39,15,10.0,4.0,updated shipping address,1382.81,734.4
+ORD-0368,2024/03/18,WEST,store,59.86,12,2.0,1.0,signature required,1839.16,1055.18
+ORD-0369,2024/08/12,EAST,store,64.23,5,1.0,5.0,signature required (repeat),627.58,372.41
+ORD-0370,2024/05/04,North,app,89.5,11,8.0,,expedite shipping,879.48,527.31
+ORD-0371,2024/12/17,North,web,52.29,25,,1.0,deliver after 6pm,1923.56,1125.15
+ORD-0372,2024/05/12,South,app,35.56,22,8.0,2.0,gift wrap requested (repeat),909.72,550.23
+ORD-0373,2024/03/05,NORTH,app,222.55,24,10.0,2.0,vip customer,1578.67,949.05
+ORD-0374,2024/04/23,North,app,17.13,27,10.0,,"rush, ship today",900.83,578.54
+ORD-0375,2024/09/12,east,app,211.57,19,14.0,1.0,"rush, ship today",1860.57,1033.66
+ORD-0376,2024/05/30,West,store,116.66,9,11.0,1.0,sample included (gift),1319.26,693.58
+ORD-0377,2024/04/04,NORTH,app,63.4,19,6.0,5.0,no weekend delivery,699.05,358.48
+ORD-0378,2024/04/13,South,store,324.12,0,2.0,1.0,vip customer,413.15,287.22
+ORD-0379,2024/02/16,North,app,39.9,5,9.0,2.0,vip customer,1466.28,803.05
+ORD-0380,2024/10/13,North,web,501.78,15,4.0,5.0,sample included,515.09,276.12
+ORD-0381,2024/11/16,North,web,98.35,20,9.0,5.0,no weekend delivery,500.02,296.06
+ORD-0382,2024/09/06,North,web,37.94,17,,1.0,leave at front desk,851.17,487.7
+ORD-0383,2024/01/30,East,web,130.91,26,,5.0,deliver after 6pm (vip),1994.19,1181.85
+ORD-0384,2024/02/02,North,app,150.52,0,9.0,3.0,vip customer (repeat),393.66,221.61
+ORD-0385,2024/12/03,West,app,95.86,26,9.0,1.0,invoice separately,1452.16,826.14
+ORD-0386,2024/03/02,East,store,24.77,8,11.0,1.0,checked and verified,994.13,559.1
+ORD-0387,2024/10/21,West,web,75.16,4,,2.0,checked and verified (repeat),1356.92,777.69
+ORD-0388,2024/02/21,East,web,33.63,18,8.0,3.0,   ,618.81,340.18
+ORD-0389,2024/07/19,North,web,162.67,14,11.0,4.0,repeat buyer,1250.93,719.63
+ORD-0390,2024/08/29,North,web,454.95,3,,3.0,signature required,1627.42,950.93
+ORD-0391,2024/12/04,South,store,61.38,24,13.0,1.0,leave at front desk (repeat),948.32,543.79
+ORD-0392,2024/10/25,East,app,59.72,4,6.0,4.0,return label enclosed,437.28,208.42
+ORD-0393,2024/03/01,WEST,store,79.77,28,3.0,2.0,partial shipment ok,360.29,213.85
+ORD-0394,2024/02/24,South,store,33.19,15,13.0,3.0,no weekend delivery (repeat),1997.14,1187.32
+ORD-0395,2024/04/05,EAST,web,37.55,29,10.0,4.0,return label enclosed,461.85,250.15
+ORD-0396,2024/12/11,East,web,105.9,13,11.0,3.0,no weekend delivery (repeat),2110.55,1248.28
+ORD-0397,2024/03/20,North,store,60.1,2,11.0,3.0,   ,1685.0,945.23
+ORD-0398,2024/07/07,WEST,app,7.46,16,5.0,2.0,partial shipment ok (gift),401.41,224.76
+ORD-0399,2024/09/03,South,web,156.01,16,,2.0,no weekend delivery,1030.33,638.93
+ORD-0400,2024/12/19,East,store,58.13,6,5.0,,partial shipment ok,766.76,476.3
+ORD-0401,2024/04/29,NORTH,store,201.51,1,11.0,5.0,call before delivery,1551.27,932.8
+ORD-0402,2024/02/21,West,app,77.44,0,14.0,2.0,no weekend delivery - confirmed,971.47,546.92
+ORD-0403,2024/08/16,WEST,web,2174.87,20,8.0,5.0,"rush, ship today - confirmed",1065.71,642.11
+ORD-0404,2024/11/29,West,store,187.71,27,8.0,,fragile items included,786.35,452.25
+ORD-0405,2024/01/29,South,store,30.18,24,8.0,,"customer called, confirmed address",356.04,186.84
+ORD-0406,2024/05/22,South,app,197.87,22,,5.0,return label enclosed,890.23,507.14
+ORD-0407,2024/05/11,South,app,94.54,28,10.0,3.0, return label enclosed - confirmed ,1847.27,1057.91
+ORD-0408,2024/10/08,West,web,54.46,17,14.0,3.0,call before delivery (vip),505.59,310.75
+ORD-0409,2024/06/08,East,web,20.07,27,14.0,1.0,updated shipping address,1605.71,939.35
+ORD-0410,2024/10/02,West,store,153.97,10,13.0,,no weekend delivery - confirmed,3385.84,1918.07
+ORD-0411,2024/11/07,East,web,50.71,5,8.0,3.0,return label enclosed - priority,1252.84,751.55
+ORD-0412,2024/10/23,North,web,83.6,5,,5.0,"rush, ship today (gift)",464.37,233.36
+ORD-0413,2024/12/18,South,store,18225.39,11,7.0,4.0,"rush, ship today",784.03,454.36
+ORD-0414,2024/09/03,South,store,32.38,15,,1.0,invoice separately (repeat),478.22,242.14
+ORD-0415,2024/06/19,East,app,109.98,15,,2.0,updated shipping address - confirmed,1663.58,971.04
+ORD-0416,2024/09/28,West,web,55.08,2,8.0,,bulk order (repeat),554.98,351.07
+ORD-0417,2024/05/03,South,app,98.02,6,9.0,4.0,standard delivery - confirmed,1631.33,937.33
+ORD-0418,2024/09/27,North,app,126.17,10,14.0,3.0,standard delivery (vip),1551.92,885.08
+ORD-0419,2024/07/24,East,store,134.04,1,7.0,4.0,"rush, ship today",1330.89,774.66
+ORD-0420,2024/10/16,EAST,web,232.55,24,9.0,2.0,fragile items included (gift),850.67,440.57
+ORD-0421,2024/03/26,North,web,104.41,0,3.0,,vip customer - confirmed,1161.31,673.95
+ORD-0422,2024/04/16,North,web,222.58,15,10.0,5.0,"customer called, confirmed address (gift)",656.15,421.25
+ORD-0423,2024/10/22,North,app,40.51,14,8.0,1.0,return label enclosed (gift),792.71,467.35
+ORD-0424,2024/08/19,South,store,21539.79,0,4.0,2.0,vip customer,787.02,452.29
+ORD-0425,2024/02/16,EAST,web,90.58,4,6.0,,no weekend delivery,400.77,212.07
+ORD-0426,2024/11/12,North,store,72.78,14,11.0,2.0,expedite shipping (gift),1221.19,722.03
+ORD-0427,2024/01/16,WEST,web,94.25,17,13.0,2.0,"customer called, confirmed address",774.43,467.2
+ORD-0428,2024/05/24,North,web,30.67,20,8.0,3.0,"customer called, confirmed address (repeat)",1661.93,972.05
+ORD-0429,2024/07/26,West,app,81.19,6,1.0,,invoice separately,743.29,441.92
+ORD-0430,2024/06/05,WEST,store,172.11,24,,1.0,deliver after 6pm (vip),1224.65,722.91
+ORD-0431,2024/11/16,West,app,39.59,14,14.0,1.0,deliver after 6pm - priority,697.52,416.43
+ORD-0432,2024/04/30,East,app,42.1,23,,3.0,vip customer (gift),464.88,298.24
+ORD-0433,2024/11/09,NORTH,store,36.44,3,14.0,5.0,   ,1276.86,696.4
+ORD-0434,2024/01/02,North,web,149.14,22,10.0,5.0,sample included (vip),342.45,220.37
+ORD-0435,2024/01/30,West,store,78.81,1,9.0,3.0,checked and verified,677.29,416.13
+ORD-0436,2024/12/08,north,store,113.55,0,7.0,2.0,leave at front desk,502.56,301.43
+ORD-0437,2024/01/17,North,store,126.86,21,,4.0,invoice separately,1399.01,859.76
+ORD-0438,2024/01/05,North,web,294.14,17,1.0,2.0,invoice separately (gift),858.15,519.77
+ORD-0439,2024/02/16,West,app,280.97,6,3.0,5.0,partial shipment ok,975.59,539.17
+ORD-0440,2024/10/13,North,store,116.17,26,7.0,3.0,no weekend delivery,678.75,386.93
+ORD-0441,2024/03/08,South,app,29.89,25,10.0,5.0,fragile items included (repeat),632.98,367.35
+ORD-0442,2024/09/03,west,app,144.71,0,6.0,4.0,"rush, ship today (gift)",1290.37,735.69
+ORD-0443,2024/07/16,WEST,store,81.65,23,3.0,3.0,signature required,203.06,141.18
+ORD-0444,2024/01/05,North,app,98.92,29,1.0,2.0,standard delivery (vip),978.89,641.46
+ORD-0445,2024/06/22,East,web,202.72,7,6.0,4.0,return label enclosed,1919.91,1043.41
+ORD-0446,2024/02/05,North,web,209.23,29,12.0,4.0,   ,1041.77,602.56
+ORD-0447,2024/07/11,East,web,179.85,0,8.0,1.0,fragile items included,1203.63,685.41
+ORD-0448,2024/08/27,SOUTH,web,26.41,2,2.0,3.0,updated shipping address,1683.91,960.74
+ORD-0449,2024/06/20,North,web,75.97,19,11.0,2.0,fragile items included,403.41,224.3
+ORD-0450,2024/09/12,north,web,123.69,8,,4.0,partial shipment ok,1221.07,702.38
+ORD-0451,2024/08/27,West,store,70.06,11,3.0,1.0,return label enclosed,1249.59,700.42
+ORD-0452,2024/08/31,North,store,162.09,2,,,bulk order,396.43,225.83
+ORD-0453,2024/07/08,NORTH,web,143.35,18,8.0,2.0,gift wrap requested - confirmed,948.06,573.38
+ORD-0454,2024/06/10,South,web,98.64,26,12.0,4.0,updated shipping address,1492.29,839.23
+ORD-0455,2024/09/18,East,app,126.0,23,2.0,5.0,fragile items included - priority,995.26,657.19
+ORD-0456,2024/05/11,South,app,89.9,7,10.0,3.0,standard delivery - confirmed,1170.58,748.12
+ORD-0457,2024/09/14,North,app,167.72,4,8.0,5.0, updated shipping address - priority ,431.36,254.56
+ORD-0458,2024/06/05,East,store,144.19,18,8.0,1.0,bulk order,641.56,366.25
+ORD-0459,2024/02/21,SOUTH,store,54.58,21,1.0,2.0," customer called, confirmed address ",1010.89,568.28
+ORD-0460,2024/04/19,South,app,29.83,9,14.0,1.0,repeat buyer (gift),904.18,503.99
+ORD-0461,2024/10/20,South,app,68.15,5,,4.0,"customer called, confirmed address",834.61,435.57
+ORD-0462,2024/05/23,North,web,58.03,17,3.0,5.0,return label enclosed,1080.39,615.84
+ORD-0463,2024/12/17,SOUTH,store,463.87,18,10.0,1.0,expedite shipping,743.64,441.96
+ORD-0464,2024/10/18,North,web,156.59,11,8.0,4.0,fragile items included (gift),747.07,388.16
+ORD-0465,2024/09/23,South,web,471.74,12,3.0,5.0,"customer called, confirmed address (gift)",546.83,374.7
+ORD-0466,2024/06/06,North,web,11.54,13,3.0,3.0,checked and verified - confirmed,3267.7,1904.91
+ORD-0467,2024/08/24,North,web,89.26,8,14.0,1.0,vip customer (gift),1946.24,1127.14
+ORD-0468,2024/10/03,West,app,169.53,16,2.0,2.0,"customer called, confirmed address - priority",633.38,338.48
+ORD-0469,2024/02/16,north,web,359.39,9,2.0,1.0,signature required (vip),307.85,220.06
+ORD-0470,2024/03/20,North,web,105.52,25,,1.0," rush, ship today - confirmed ",239.18,167.19
+ORD-0471,2024/02/03,EAST,store,157.87,27,11.0,3.0,sample included (repeat),472.96,220.26
+ORD-0472,2024/04/25,East,web,75.5,8,14.0,5.0,signature required,509.86,328.41
+ORD-0473,2024/07/12,East,store,52.46,17,13.0,5.0, partial shipment ok (vip) ,1395.39,810.78
+ORD-0474,2024/03/22,North,app,102.09,12,,2.0,updated shipping address,1152.6,695.14
+ORD-0475,2024/07/23,South,store,196.05,29,7.0,4.0,partial shipment ok - confirmed,806.29,471.83
+ORD-0476,2024/10/05,East,store,18.66,25,13.0,1.0,no weekend delivery,700.16,402.3
+ORD-0477,2024/07/03,north,app,37.46,28,12.0,5.0, invoice separately ,529.28,305.05
+ORD-0478,2024/06/30,South,web,95.79,2,10.0,1.0,bulk order - confirmed,914.09,491.34
+ORD-0479,2024/01/02,North,web,31.19,20,2.0,2.0,vip customer,1156.14,637.74
+ORD-0480,2024/05/26,South,web,45.84,21,2.0,5.0,standard delivery (repeat),1516.43,924.35
+ORD-0481,2024/08/07,North,store,104.16,26,11.0,3.0,   ,1641.54,953.3
+ORD-0482,2024/09/28,NORTH,web,471.78,5,,4.0,gift wrap requested,1099.66,622.65
+ORD-0483,2024/11/07,South,web,33.97,10,9.0,5.0,repeat buyer,1310.85,767.13
+ORD-0484,2024/07/31,South,web,47.38,3,4.0,4.0,deliver after 6pm (gift),742.11,429.77
+ORD-0485,2024/07/04,North,web,144.33,5,3.0,5.0,partial shipment ok,651.75,383.31
+ORD-0486,2024/05/05,South,web,19.65,10,9.0,,signature required (repeat),392.19,246.22
+ORD-0487,2024/04/18,South,store,116.96,11,8.0,5.0,gift wrap requested,321.36,223.98
+ORD-0488,2024/09/21,South,store,52.51,30,10.0,5.0,sample included,656.48,404.92
+ORD-0489,2024/06/05,North,web,124.89,0,7.0,4.0,vip customer (vip),631.36,351.88
+ORD-0490,2024/02/28,South,web,69.46,13,5.0,4.0,repeat buyer,1967.19,1076.03
+ORD-0491,2024/08/14,East,app,29.91,15,13.0,4.0,gift wrap requested,469.95,281.63
+ORD-0492,2024/06/14,West,web,35.75,25,,3.0,checked and verified (gift),957.12,586.72
+ORD-0493,2024/07/02,East,web,157.44,4,5.0,5.0,repeat buyer (vip),912.16,517.28
+ORD-0494,2024/04/06,West,store,179.36,27,4.0,1.0,return label enclosed,364.4,168.03
+ORD-0495,2024/04/12,West,store,70.13,28,8.0,4.0,deliver after 6pm,321.12,148.17
+ORD-0496,2024/12/16,North,store,34.23,23,,3.0,vip customer (gift),1773.55,1000.9
+ORD-0497,2024/03/04,North,web,69.06,15,2.0,5.0,fragile items included (vip),1065.97,625.44
+ORD-0498,2024/09/02,North,store,232.12,25,12.0,1.0,repeat buyer (gift),733.92,402.76
+ORD-0499,2024/01/12,South,store,79.02,13,5.0,4.0,updated shipping address,2159.9,1278.75
+ORD-0500,2024/07/13,East,app,86.09,10,6.0,,signature required (repeat),755.61,485.34
+ORD-0501,2024/08/20,East,store,182.05,10,13.0,1.0,no weekend delivery,2177.7,1279.24
+ORD-0502,2024/09/14,North,store,90.95,14,13.0,1.0,"customer called, confirmed address - priority",836.98,460.01
+ORD-0503,2024/10/29,North,store,20.57,0,13.0,1.0,leave at front desk (vip),1950.97,1149.44
+ORD-0504,2024/02/29,North,web,138.9,27,2.0,1.0,no weekend delivery,206.23,109.41
+ORD-0505,2024/07/01,North,app,17.95,29,13.0,,updated shipping address,949.72,507.98
+ORD-0506,2024/02/26,South,web,296.47,1,3.0,1.0,partial shipment ok - confirmed,966.24,545.44
+ORD-0507,2024/09/28,South,web,41.74,6,5.0,3.0,expedite shipping,986.84,549.93
+ORD-0508,2024/10/11,West,web,402.23,16,1.0,,repeat buyer,1603.31,895.3
+ORD-0509,2024/02/21,North,web,181.15,24,3.0,1.0,leave at front desk,659.23,416.76
+ORD-0510,2024/08/07,East,web,114.88,24,,2.0,invoice separately - confirmed,946.56,578.55
+ORD-0511,2024/06/13,SOUTH,web,126.97,1,14.0,5.0,leave at front desk,407.46,219.54
+ORD-0512,2024/09/14,South,web,22.78,9,8.0,5.0,bulk order - confirmed,1396.76,850.09
+ORD-0513,2024/12/10,East,web,12.53,16,7.0,2.0,repeat buyer,1252.61,690.29
+ORD-0514,2024/06/27,South,store,16.88,17,6.0,2.0,checked and verified,1206.04,652.24
+ORD-0515,2024/11/15,North,web,92.51,16,9.0,2.0,fragile items included (vip),4929.17,2842.9
+ORD-0516,2024/11/19,north,app,110.4,8,,1.0,standard delivery (gift),3279.32,1857.5
+ORD-0517,2024/05/09,South,app,132.56,11,11.0,, expedite shipping - priority ,216.14,96.47
+ORD-0518,2024/07/25,East,store,78.45,5,10.0,5.0,expedite shipping (gift),937.94,567.92
+ORD-0519,2024/07/15,SOUTH,web,85.76,6,14.0,,   ,332.4,186.65
+ORD-0520,2024/07/14,West,web,43.33,13,11.0,5.0,repeat buyer,1181.62,645.73
+ORD-0521,2024/02/21,North,web,351.3,16,5.0,3.0,"rush, ship today (repeat)",1421.84,812.25
+ORD-0522,2024/07/29,South,web,47.21,-999,1.0,,no weekend delivery,633.93,393.87
+ORD-0523,2024/03/11,North,web,468.62,4,2.0,2.0,   ,725.75,441.68
+ORD-0524,2024/11/19,East,app,118.99,25,8.0,1.0,checked and verified,1336.51,772.07
+ORD-0525,2024/05/04,South,app,67.28,20,6.0,1.0,call before delivery - priority,472.69,282.7
+ORD-0526,2024/12/10,south,web,945.57,17,7.0,1.0,signature required,692.87,381.04
+ORD-0527,2024/01/19,South,web,125.89,18,,1.0,checked and verified,589.9,328.43
+ORD-0528,2024/02/07,South,store,138.74,29,12.0,2.0,gift wrap requested (repeat),441.66,278.79
+ORD-0529,2024/10/09,North,store,89.39,20,4.0,4.0,leave at front desk,311.12,228.69
+ORD-0530,2024/09/24,EAST,web,42.28,11,5.0,4.0,"rush, ship today",1921.55,1123.88
+ORD-0531,2024/07/02,West,app,26.0,15,2.0,,return label enclosed (repeat),1526.56,884.3
+ORD-0532,2024/04/05,North,app,28.51,4,14.0,4.0,checked and verified,2087.34,1180.96
+ORD-0533,2024/09/07,South,web,58.94,6,2.0,1.0,partial shipment ok,1111.3,682.57
+ORD-0534,2024/07/12,North,web,77.07,19,4.0,1.0,"rush, ship today (gift)",1545.82,858.75
+ORD-0535,2024/07/11,East,store,63.55,23,9.0,4.0,standard delivery,268.13,170.33
+ORD-0536,2024/12/05,North,store,44.71,0,4.0,,vip customer,1054.97,605.18
+ORD-0537,2024/02/17,North,app,48.86,28,10.0,,invoice separately (repeat),511.33,335.19
+ORD-0538,2024/02/11,South,web,190.68,14,7.0,1.0,leave at front desk (gift),1995.8,1181.57
+ORD-0539,2024/05/06,north,store,31.84,-999,2.0,4.0,gift wrap requested,705.32,396.99
+ORD-0540,2024/10/26,NORTH,store,95.3,19,,4.0,leave at front desk (vip),473.65,218.89
+ORD-0364,2024/01/06,North,app,18.33,4,12.0,4.0,   ,715.78,434.31
+ORD-0160,2024/04/01,South,web,20.65,0,10.0,5.0,standard delivery (repeat),836.78,478.76
+ORD-0439,2024/02/16,West,app,280.97,6,3.0,5.0,partial shipment ok,975.59,539.17
+ORD-0127,2024/06/16,West,store,165.47,2,,1.0,no weekend delivery,749.86,424.51
+ORD-0209,2024/02/01,East,store,178.11,20,12.0,3.0,return label enclosed (repeat),2223.53,1277.35
+ORD-0306,2024/09/23,North,store,36.29,6,4.0,3.0,   ,951.77,533.75
+ORD-0233,2024/12/11,South,store,62.7,16,12.0,1.0,no weekend delivery,446.06,290.78
+ORD-0217,2024/10/11,South,web,101.59,26,2.0,3.0,repeat buyer,575.65,342.92
+ORD-0266,2024/12/10,North,web,148.03,22,11.0,5.0,expedite shipping,1086.63,660.78
+ORD-0122,2024/12/17,North,web,326.72,22,10.0,,gift wrap requested,463.48,262.71

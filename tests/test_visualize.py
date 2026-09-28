@@ -45,3 +45,26 @@ def test_generate_charts_records_failures(tmp_path, monkeypatch):
     refs = generate_charts(_df(), tmp_path / "charts", failures=failures)
     assert any("correlation_heatmap" in f and "kaboom" in f for f in failures)
     assert refs, "other charts should still render"
+
+
+def test_generate_charts_grouped_boxplots_and_time_trend(tmp_path):
+    rng = np.random.default_rng(11)
+    region = rng.choice(["N", "S"], 60)
+    df = pd.DataFrame(
+        {
+            "day": pd.date_range("2024-01-01", periods=60, freq="D"),
+            "sales": rng.normal(100, 5, 60) + np.where(region == "N", 100.0, 0.0),
+            "region": region,
+        }
+    )
+    refs = generate_charts(df, tmp_path / "charts")
+    titles = [r["title"] for r in refs]
+    assert "Numeric by Category" in titles
+    assert "Time Trend" in titles
+    for ref in refs:
+        assert (tmp_path / ref["path"]).stat().st_size > 1000
+
+
+def test_generate_charts_skips_time_trend_without_datetime(tmp_path):
+    refs = generate_charts(_df(), tmp_path / "charts")
+    assert "Time Trend" not in [r["title"] for r in refs]

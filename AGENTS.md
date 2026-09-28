@@ -1,6 +1,6 @@
 # sift-agent
 
-Auto-EDA agent: CSV/Excel/ODS in → statistical profile → charts → LLM (or offline heuristic) insights → recommendations → markdown report. Built on LangGraph, pandas, matplotlib/seaborn, typer/rich CLI, and an optional Streamlit UI.
+Auto-EDA agent: CSV/Excel/ODS in → statistical profile + data-health score → charts → LLM (or offline heuristic) insights → recommendations → markdown report and a self-contained shareable HTML report. Built on LangGraph, pandas, matplotlib/seaborn, typer/rich CLI, and an optional Streamlit UI.
 
 ## Quick Reference
 

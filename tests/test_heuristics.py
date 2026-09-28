@@ -54,7 +54,51 @@ def test_heuristics_on_clean_profile():
     df = pd.DataFrame({"a": [1.0, 2.0, 3.0], "b": ["x", "y", "z"]})
     p = profile_dataframe(df)
     assert "No missing values detected" in heuristic_insights(p)
-    assert "Scale numeric features" in heuristic_recommendations(p)
+    recs = heuristic_recommendations(p)
+    assert "Scale numeric features" not in recs  # boilerplate removed
+    assert "hypothesis-driven" in recs
 
     no_num = pd.DataFrame({"b": ["x", "y", "z"]})
     assert "hypothesis-driven" in heuristic_recommendations(profile_dataframe(no_num))
+
+
+def test_heuristic_recommendations_data_aware():
+    df = pd.DataFrame(
+        {
+            "txt_num": ["1", "2", "3", "n/a"] * 3,
+            "uid": [f"u{i}" for i in range(12)],
+        }
+    )
+    p = profile_dataframe(df)
+    recs = heuristic_recommendations(p)
+    assert "pd.to_numeric" in recs
+    assert "ID-like" in recs or "ID" in recs
+
+
+def test_heuristics_flag_pii_columns():
+    df = pd.DataFrame(
+        {
+            "email": ["a@x.com", "b@y.com", "c@z.com", "d@w.com"],
+            "value": [1, 2, 3, 4],
+        }
+    )
+    p = profile_dataframe(df)
+    assert "PII" in heuristic_insights(p)
+    assert "PII" in heuristic_recommendations(p)
+
+
+def test_heuristic_insights_cover_new_sections():
+    rng = np.random.default_rng(9)
+    dates = pd.date_range("2024-01-01", periods=60, freq="D")
+    region = rng.choice(["N", "S"], 60)
+    df = pd.DataFrame(
+        {
+            "day": dates,
+            "sales": rng.normal(100, 5, 60) + np.where(region == "N", 100.0, 0.0),
+            "region": region,
+        }
+    )
+    p = profile_dataframe(df)
+    insights = heuristic_insights(p)
+    assert "`day` spans" in insights
+    assert "`sales` varies most by `region`" in insights
