@@ -207,6 +207,31 @@ def test_data_quality_checks_empty_columns_ignored():
     assert data_quality_checks(df) == []
 
 
+def test_data_quality_flags_padded_strings_without_blanks():
+    df = pd.DataFrame(
+        {
+            "padded": [" Alice ", "Bob", " Carol ", "Dave"],
+            "ok": ["x", "y", "z", "w"],
+        }
+    )
+    issues = data_quality_checks(df)
+    found = {(i["check"], i["column"]) for i in issues}
+    assert ("whitespace", "padded") in found
+    assert all(col != "ok" for _, col in found)
+
+
+def test_all_column_missing_covers_beyond_profile_cap():
+    data = {f"c{i}": [1.0, 2.0] for i in range(105)}
+    data["c104"] = [np.nan, np.nan]
+    p = profile_dataframe(pd.DataFrame(data))
+    assert len(p["columns"]) == 100
+    assert p["note"]
+    flagged = {m["column"] for m in p["all_column_missing"]}
+    assert "c104" in flagged
+    assert p["top_missing"][0]["column"] == "c104"
+    assert p["top_missing"][0]["pct_missing"] == 100.0
+
+
 def test_data_quality_checks_skips_real_datetimes():
     df = pd.DataFrame({"d": pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"])})
     assert data_quality_checks(df) == []

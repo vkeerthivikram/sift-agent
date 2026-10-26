@@ -7,6 +7,7 @@ import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any
+from zoneinfo import ZoneInfo
 
 import typer
 from rich.console import Console
@@ -15,7 +16,7 @@ from rich.table import Table
 
 from .analysis import profile_dataframe
 from .config import DEFAULT_MODELS, PROVIDERS, REQUIRED_ENV, get_llm
-from .graph import run_pipeline
+from .graph import MAX_INPUT_BYTES, MAX_ROWS, run_pipeline
 from .loader import LoadError, load_table
 from .paths import unique_dir
 from .qa import answer_question
@@ -231,6 +232,13 @@ def ask(
             ),
         ),
     ] = None,
+    tz: Annotated[
+        str,
+        typer.Option(
+            "--tz",
+            help="IANA timezone for relative dates in questions (default: UTC).",
+        ),
+    ] = "UTC",
 ) -> None:
     """Ask a natural-language question about a CSV/Excel/ODS file (offline by default)."""
     logging.basicConfig(
@@ -239,16 +247,40 @@ def ask(
     _, llm = _resolve_llm(provider, model, temperature)
 
     try:
-        df, _ = load_table(input_path, sheet=sheet)
+        ZoneInfo(tz)
+    except Exception:
+        console.print(f"\n[red]Error:[/red] unknown timezone '{tz}' (use an IANA name)")
+        raise typer.Exit(code=1)
+
+    try:
+        size = input_path.stat().st_size
+    except OSError as exc:
+        console.print(f"\n[red]Error:[/red] could not stat '{input_path}': {exc}")
+        raise typer.Exit(code=1)
+    if size > MAX_INPUT_BYTES:
+        console.print(
+            f"\n[red]Error:[/red] input is {size / 1e6:.1f} MB; maximum supported "
+            f"size is {MAX_INPUT_BYTES / 1e6:.0f} MB"
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        df, _ = load_table(input_path, sheet=sheet, max_rows=MAX_ROWS)
     except LoadError as exc:
         console.print(f"\n[red]Error:[/red] {exc}")
         raise typer.Exit(code=1)
     except Exception as exc:
         console.print(f"\n[red]Error:[/red] could not load '{input_path}': {exc}")
         raise typer.Exit(code=1)
+    if len(df) > MAX_ROWS:
+        console.print(
+            f"\n[red]Error:[/red] input has {len(df):,} rows; maximum supported "
+            f"is {MAX_ROWS:,}"
+        )
+        raise typer.Exit(code=1)
     profile = profile_dataframe(df)
 
-    result = answer_question(question, df, profile, llm=llm)
+    result = answer_question(question, df, profile, llm=llm, tz=tz)
     console.rule("[bold]Answer")
     console.print(Markdown(result["answer"]))
     mode = "offline (deterministic)" if result["offline"] else "online (LLM)"

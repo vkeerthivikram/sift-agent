@@ -8,14 +8,18 @@ Standalone module — no dependency on ``graph`` or ``investigate``.
 
 from __future__ import annotations
 
+import json
 import logging
 import math
 import re
+from datetime import datetime, UTC
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
 from .analysis import column_summary
+from .query import execute_plan, parse_question
 
 logger = logging.getLogger("sift_agent.qa")
 
@@ -61,6 +65,13 @@ _TYPE_RE = re.compile(r"\b(data\s*types?|dtypes?|types?)\b")
 _DUP_RE = re.compile(r"\bduplicat\w*\b")
 _OUTLIER_SECTION_RE = re.compile(r"\b(outliers?|odd|extremes?|anomal\w*)\b")
 _QUALITY_SECTION_RE = re.compile(r"\b(quality|dirty|issues?|messy)\b")
+_STAT_QUESTION_RE = re.compile(
+    r"\b(max|maximum|largest|highest|biggest|min|minimum|smallest|lowest|"
+    r"avg|average|mean|sum|total|count|how many|number of)\b"
+)
+_QUALIFIER_RE = re.compile(
+    r"\b(for|where|group\s+by|by|during|since|between|after|before)\b"
+)
 
 # Question words that must never partially match a multi-word column name.
 _STOPWORDS = frozenset(
@@ -173,10 +184,12 @@ def _match_columns(question: str, columns: list[str]) -> list[str]:
 
     A column matches when its full name appears in the question (case and
     separator insensitive, plural tolerant), or — for multi-word column names —
-    when one distinctive word of the name appears.
+    when one distinctive word of the name appears. Full-name matches always
+    outrank word matches, so naming a column exactly wins even when another
+    column shares one of its words.
     """
     q_text = f" {' '.join(_canon_word(w) for w in _words(question))} "
-    scored: list[tuple[int, int, str]] = []
+    scored: list[tuple[int, int, int, str]] = []
     for col in columns:
         tokens = [_canon_word(w) for w in _words(str(col))]
         if not tokens:
@@ -184,7 +197,7 @@ def _match_columns(question: str, columns: list[str]) -> list[str]:
         phrase = " ".join(tokens)
         idx = q_text.find(f" {phrase} ")
         if idx >= 0:
-            scored.append((q_text[:idx].count(" "), -len(phrase), str(col)))
+            scored.append((0, q_text[:idx].count(" "), -len(phrase), str(col)))
             continue
         if len(tokens) < 2:
             continue
@@ -197,9 +210,9 @@ def _match_columns(question: str, columns: list[str]) -> list[str]:
                 pos = q_text[:i].count(" ")
                 best = pos if best is None else min(best, pos)
         if best is not None:
-            scored.append((best, -len(phrase), str(col)))
+            scored.append((1, best, -len(phrase), str(col)))
     scored.sort()
-    return [col for _, _, col in scored]
+    return [col for _, _, _, col in scored]
 
 
 def _column_universe(df: pd.DataFrame, profile: dict) -> list[str]:
@@ -559,13 +572,194 @@ def _response_text(response: Any) -> str:
     return text
 
 
+def _fmt_query_value(v) -> str:
+    if v is None:
+        return "n/a"
+    if isinstance(v, bool):
+        return str(v)
+    if isinstance(v, (int, float)):
+        return _fmt_num(v)
+    return str(v)
+
+
+def _collect_filter_columns(node, add) -> None:
+    if not isinstance(node, dict):
+        return
+    column = node.get("column")
+    if column:
+        add(column)
+    for child in node.get("children") or []:
+        _collect_filter_columns(child, add)
+    _collect_filter_columns(node.get("child"), add)
+
+
+def _plan_sources(plan: dict) -> list[str]:
+    cols: list[str] = []
+
+    def add(col: str) -> None:
+        if col and col not in cols:
+            cols.append(col)
+
+    add(plan.get("column"))
+    _collect_filter_columns(plan.get("filters"), add)
+    for col in plan.get("group_by") or []:
+        add(col)
+    return [f"column: {c}" for c in cols]
+
+
+def _query_answer(plan: dict, result: dict) -> tuple[str, list[str]]:
+    """Render an executed query plan as an answer plus its column sources."""
+    lines = [result["interpretation"]]
+    if result.get("groups") is not None:
+        for row in result["groups"]:
+            label = ", ".join(f"{k}={v}" for k, v in row["group"].items())
+            lines.append(
+                f"- {label}: {_fmt_query_value(row['value'])} (n={row['n']:,})"
+            )
+        if result.get("truncated"):
+            lines.append(f"(showing the first {len(result['groups'])} groups)")
+    else:
+        lines.append(
+            f"Result: {_fmt_query_value(result.get('value'))} "
+            f"({_fmt_count(result.get('n_used') or 0)} of "
+            f"{_fmt_count(result.get('n_matched') or 0)} matching rows used)."
+        )
+    return "\n".join(lines), _plan_sources(plan)
+
+
+QUERY_SYSTEM_PROMPT = (
+    "You translate data questions into strict JSON query plans. "
+    "Output ONLY the JSON object, no prose."
+)
+
+QUERY_PROMPT = """Today is {today} in timezone {tz}.
+
+Columns in the dataset:
+{columns}
+
+Translate the question into a JSON query plan.
+
+Plan schema:
+{{"aggregate": "count|count_nonnull|sum|mean|min|max", "column": <column name or null>, "filters": <filter node or null>, "group_by": [<column names>] or null}}
+
+Filter nodes:
+{{"op": "and"|"or", "children": [<node>, ...]}}
+{{"op": "not", "child": <node>}}
+{{"op": "="|"!="|"<"|"<="|">"|">=", "column": <c>, "value": <v>}}
+{{"op": "in"|"not in", "column": <c>, "values": [<v>, ...]}}
+{{"op": "between", "column": <c>, "low": <v>, "high": <v>}}
+{{"op": "is null"|"not null", "column": <c>}}
+
+Rules:
+- Use only the listed columns. Numeric columns need number values; text columns need string values.
+- For dates use @-tokens or ISO strings: @now, @day_start, @week_start, @month_start, @quarter_start, @year_start, @last_day_start, @last_week_start, @last_month_start, @last_quarter_start, @last_year_start, @last_7_days_start, or "2024-05-01".
+- Express ranges as half-open: >= start and < next start.
+- "count" counts matching rows and needs no column; "count_nonnull" needs one.
+- Filters are optional; omit them when the question has none.
+- If the question cannot be expressed with this schema, output {{"error": "reason"}}.
+
+Question: {question}
+
+JSON:"""
+
+
+def _columns_for_prompt(df: pd.DataFrame, limit: int = 40) -> str:
+    lines: list[str] = []
+    for col in df.columns[:limit]:
+        s = df[col]
+        if _is_numeric(s):
+            kind, samples = "numeric", f"min {s.min()}, max {s.max()}"
+        elif pd.api.types.is_datetime64_any_dtype(s):
+            kind, samples = "datetime", f"{s.min()} .. {s.max()}"
+        elif pd.api.types.is_bool_dtype(s):
+            kind, samples = "boolean", "True/False"
+        else:
+            uniq = s.dropna().astype(str).unique()[:5]
+            kind, samples = "text", ", ".join(map(repr, uniq)) or "empty"
+        lines.append(f"- {col} ({kind}) e.g. {samples}")
+    if len(df.columns) > limit:
+        lines.append(f"... and {len(df.columns) - limit} more columns")
+    return "\n".join(lines)
+
+
+def _extract_json(text: str) -> dict | None:
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        return None
+    try:
+        obj = json.loads(match.group(0))
+    except ValueError:
+        return None
+    return obj if isinstance(obj, dict) else None
+
+
+def _llm_query_answer(
+    question: str,
+    df: pd.DataFrame,
+    llm: Any,
+    tz: str,
+    now: datetime | None,
+) -> dict | None:
+    """Translate a question via the LLM into a plan, then execute it locally.
+
+    Returns None on any failure so the caller falls back to the normal
+    grounded QA call; numbers always come from local execution.
+    """
+    try:
+        try:
+            zone = ZoneInfo(tz)
+        except Exception:
+            zone = UTC
+        today = (now or datetime.now(UTC)).astimezone(zone)
+        prompt = QUERY_PROMPT.format(
+            today=today.strftime("%Y-%m-%d"),
+            tz=tz,
+            columns=_columns_for_prompt(df),
+            question=question,
+        )
+        resp = llm.invoke([("system", QUERY_SYSTEM_PROMPT), ("human", prompt)])
+        plan = _extract_json(_response_text(resp))
+        if plan is None or "error" in plan:
+            return None
+        result = execute_plan(df, plan, tz=tz, now=now)
+        if not result.get("ok"):
+            logger.warning("LLM query plan rejected: %s", result.get("error"))
+            return None
+        answer, sources = _query_answer(plan, result)
+        return {"answer": answer, "offline": False, "sources": sources, "query": plan}
+    except Exception as exc:
+        logger.warning("LLM query translation failed: %s", exc)
+        return None
+
+
 def _offline_result(
     question: str,
     df: pd.DataFrame,
     profile: dict,
     context: str,
     context_sources: list[str],
+    tz: str = "UTC",
+    now: datetime | None = None,
 ) -> dict:
+    matched = _match_columns(question, _column_universe(df, profile))
+    try:
+        plan = parse_question(question, df, matched, tz=tz, now=now)
+    except Exception as exc:
+        logger.warning("offline query parse failed: %s", exc)
+        plan = None
+    if plan is not None:
+        result = execute_plan(df, plan, tz=tz, now=now)
+        if result.get("ok"):
+            answer, sources = _query_answer(plan, result)
+            return {"answer": answer, "offline": True, "sources": sources}
+        logger.warning("offline query plan rejected: %s", result.get("error"))
+    q_lower = question.lower()
+    if _QUALIFIER_RE.search(q_lower) and _STAT_QUESTION_RE.search(q_lower):
+        return {
+            "answer": f"{OFFLINE_PREFACE}\n{context}",
+            "offline": True,
+            "sources": context_sources,
+        }
     hit = _intent_answer(question, df, profile)
     if hit is not None:
         answer, sources = hit
@@ -582,18 +776,28 @@ def answer_question(
     df: pd.DataFrame,
     profile: dict,
     llm: Any | None = None,
+    tz: str = "UTC",
+    now: datetime | None = None,
 ) -> dict:
     """Answer a natural-language question about a profiled DataFrame.
 
     Returns ``{"answer": str, "offline": bool, "sources": list[str]}``. With
     ``llm=None`` (or when the LLM call fails) a deterministic regex intent
-    engine answers from the data; unsupported questions get a best-effort
-    answer listing the retrieved context facts, never fabricated numbers.
-    A failed LLM call additionally sets a ``"warning"`` key naming the error.
+    engine answers from the data; filtered/grouped aggregate questions go
+    through the validated query-plan engine in ``query`` and are computed
+    with pandas. ``tz`` (IANA name) and ``now`` control relative-date
+    resolution. Unsupported questions get a best-effort answer listing the
+    retrieved context facts, never fabricated numbers. A failed LLM call
+    additionally sets a ``"warning"`` key naming the error.
     """
     context, sources = build_context(question, df, profile)
     if llm is None:
-        return _offline_result(question, df, profile, context, sources)
+        return _offline_result(question, df, profile, context, sources, tz=tz, now=now)
+    q_lower = question.lower()
+    if _QUALIFIER_RE.search(q_lower) and _STAT_QUESTION_RE.search(q_lower):
+        query_result = _llm_query_answer(question, df, llm, tz, now)
+        if query_result is not None:
+            return query_result
     try:
         resp = llm.invoke(
             [
@@ -604,7 +808,9 @@ def answer_question(
         return {"answer": _response_text(resp), "offline": False, "sources": sources}
     except Exception as exc:
         logger.warning("question LLM call failed; answering offline instead: %s", exc)
-        result = _offline_result(question, df, profile, context, sources)
+        result = _offline_result(
+            question, df, profile, context, sources, tz=tz, now=now
+        )
         result["offline"] = True
         result["warning"] = (
             f"question LLM call failed ({exc.__class__.__name__}); "

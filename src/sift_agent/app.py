@@ -6,6 +6,7 @@ Run with:  uv run sift-ui
 
 from __future__ import annotations
 
+import hashlib
 import io
 import os
 import shutil
@@ -212,7 +213,7 @@ def _render_chat_message(msg: dict) -> None:
             st.caption("sources: " + ", ".join(msg["sources"]))
 
 
-def _answer_chat(question: str) -> dict:
+def _answer_chat(question: str, tz: str) -> dict:
     """Answer one question against the last run's data; LLM failures go offline."""
     settings = st.session_state.get("run_llm_settings") or {}
     llm = None
@@ -235,6 +236,7 @@ def _answer_chat(question: str) -> dict:
         st.session_state.get("last_df"),
         st.session_state.get("last_profile") or {},
         llm=llm,
+        tz=tz,
     )
     if not note and result.get("warning"):
         note = result["warning"]
@@ -252,13 +254,19 @@ def _render_ask_tab(out_dir: str) -> None:
     history: list[dict] = st.session_state.setdefault(f"chat_{out_dir}", [])
     for msg in history:
         _render_chat_message(msg)
+    tz = st.text_input(
+        "Timezone for relative dates (IANA)",
+        value=st.session_state.get("qa_tz", "UTC"),
+        key=f"tz_{out_dir}",
+    )
+    st.session_state["qa_tz"] = tz
     question = st.chat_input(
         "Ask a question about this dataset…", key=f"chat_input_{out_dir}"
     )
     if question:
         history.append({"role": "user", "content": question})
         _render_chat_message(history[-1])
-        result = _answer_chat(question)
+        result = _answer_chat(question, tz)
         entry = {
             "role": "assistant",
             "content": result["answer"],
@@ -471,11 +479,15 @@ if uploaded is not None:
             else:
                 st.caption(f"Workbook has one sheet: `{sheets[0]}`")
 
-    settings_key = f"{uploaded.name}|{sheet}|{provider}|{model}|{temperature}"
+    digest = hashlib.sha256(data).hexdigest()[:16]
+    settings_key = f"{uploaded.name}|{digest}|{sheet}|{provider}|{model}|{temperature}"
     if st.session_state.get("run_settings") != settings_key:
         st.session_state["run_settings"] = settings_key
         st.session_state.pop("result", None)
         st.session_state.pop("out_dir", None)
+        st.session_state.pop("preview_df", None)
+        st.session_state.pop("last_df", None)
+        st.session_state.pop("last_profile", None)
 
     st.divider()
     if st.button("Run analysis", type="primary", use_container_width=True):

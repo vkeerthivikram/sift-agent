@@ -179,3 +179,64 @@ def test_sheet_names_from_stream(tmp_path):
 def test_sheet_names_rejects_non_workbook():
     with pytest.raises(LoadError, match="not a workbook format"):
         sheet_names("/tmp/kilo/whatever.csv")
+
+
+def test_selected_sheet_parses_only_that_sheet(tmp_path, monkeypatch):
+    import sift_agent.loader as loader_mod
+
+    p = tmp_path / "selective.xlsx"
+    _write_workbook(
+        p,
+        {
+            "Big": pd.DataFrame({"id": range(50)}),
+            "Feb": pd.DataFrame({"id": [3]}),
+        },
+    )
+    parsed: list[str] = []
+    real_excel = loader_mod.pd.ExcelFile
+
+    class RecordingBook(real_excel):
+        def parse(self, name, **kwargs):
+            parsed.append(name)
+            return super().parse(name, **kwargs)
+
+    monkeypatch.setattr(loader_mod.pd, "ExcelFile", RecordingBook)
+    df, warnings = load_table(p, sheet="Feb")
+    assert df["id"].tolist() == [3]
+    assert warnings == []
+    assert parsed == ["Feb"]
+
+
+def test_csv_max_rows_reads_one_extra_row(tmp_path):
+    p = tmp_path / "tiny.csv"
+    p.write_text("id\n1\n2\n3\n4\n5\n6\n", encoding="utf-8")
+    df, _ = load_table(p, max_rows=2)
+    assert len(df) == 3  # budget + overflow sentinel row
+    assert df["id"].tolist() == [1, 2, 3]
+
+
+def test_combined_sheets_respect_running_row_budget(tmp_path):
+    p = tmp_path / "budget.xlsx"
+    _write_workbook(
+        p,
+        {
+            "Jan": pd.DataFrame({"id": [1, 2]}),
+            "Feb": pd.DataFrame({"id": [3, 4]}),
+        },
+    )
+    df, warnings = load_table(p, max_rows=2)
+    assert len(df) == 3  # sentinel row proves overflow for the caller
+    assert any("combined 2 sheets" in w for w in warnings)
+
+
+def test_row_budget_within_limits_combines_everything(tmp_path):
+    p = tmp_path / "budget_ok.xlsx"
+    _write_workbook(
+        p,
+        {
+            "Jan": pd.DataFrame({"id": [1, 2]}),
+            "Feb": pd.DataFrame({"id": [3, 4]}),
+        },
+    )
+    df, _ = load_table(p, max_rows=10)
+    assert df["id"].tolist() == [1, 2, 3, 4]

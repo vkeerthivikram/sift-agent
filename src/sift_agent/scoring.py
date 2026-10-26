@@ -80,28 +80,61 @@ def _worst_missing(columns: dict) -> tuple[str | None, float]:
     return worst_col, worst_pct
 
 
-def _completeness(columns: dict) -> tuple[float, str]:
+def _completeness_from_pcts(
+    pcts: list[float], n_columns: int, worst: tuple[str | None, float]
+) -> tuple[float, str]:
     """100 minus the blend of mean and worst per-column missingness.
 
     Blending keeps a single heavily-missing column from being diluted by
     wide datasets (mean alone) while not over-reacting to one bad column
     (worst alone).
     """
-    if not columns:
+    if n_columns == 0:
         return 100.0, "No column profiles to assess."
-    pcts = [float((col or {}).get("pct_missing") or 0) for col in columns.values()]
-    mean_missing = sum(pcts) / len(pcts)
-    worst_col, worst_pct = _worst_missing(columns)
+    mean_missing = sum(pcts) / n_columns
+    worst_col, worst_pct = worst
     penalty = (mean_missing + worst_pct) / 2
     if worst_col is None:
-        detail = f"No missing values across {len(columns)} columns."
+        detail = f"No missing values across {n_columns} columns."
     else:
         detail = (
             f"Average {_fmt_pct(round(mean_missing, 2))}% missing across "
-            f"{len(columns)} columns; worst is `{worst_col}` at "
+            f"{n_columns} columns; worst is `{worst_col}` at "
             f"{_fmt_pct(worst_pct)}%."
         )
     return _clamp(100.0 - penalty), detail
+
+
+def _completeness_legacy(columns: dict) -> tuple[float, str]:
+    """Completeness from a per-column profile dict (no whole-frame scan)."""
+    pcts = [float((col or {}).get("pct_missing") or 0) for col in columns.values()]
+    return _completeness_from_pcts(pcts, len(columns), _worst_missing(columns))
+
+
+def _worst_missing_all(profile: dict, columns: dict) -> tuple[str | None, float]:
+    """Highest-missingness column across every column when the profile
+    carries ``all_column_missing``; falls back to the profiled-column dict."""
+    all_missing = profile.get("all_column_missing")
+    if all_missing is None:
+        return _worst_missing(columns)
+    worst = max(
+        all_missing, key=lambda m: float(m.get("pct_missing") or 0), default=None
+    )
+    if worst is None:
+        return None, 0.0
+    return str(worst["column"]), float(worst.get("pct_missing") or 0)
+
+
+def _completeness(profile: dict, columns: dict) -> tuple[float, str]:
+    """Completeness over every column when ``all_column_missing`` is present."""
+    all_missing = profile.get("all_column_missing")
+    if all_missing is None:
+        return _completeness_legacy(columns)
+    n_columns = int(profile.get("n_columns") or 0) or len(columns)
+    pcts = [float(m.get("pct_missing") or 0) for m in all_missing]
+    return _completeness_from_pcts(
+        pcts, n_columns, _worst_missing_all(profile, columns)
+    )
 
 
 def _uniqueness(n_rows: int, duplicate_rows: int) -> tuple[float, str]:
@@ -199,7 +232,7 @@ def health_score(profile: dict) -> dict:
     constant_columns = profile.get("constant_columns") or []
 
     parts = {
-        "completeness": _completeness(columns),
+        "completeness": _completeness(profile, columns),
         "uniqueness": _uniqueness(n_rows, duplicate_rows),
         "consistency": _consistency(n_columns, by_check, len(constant_columns)),
         "validity": _validity(n_columns, by_check),
@@ -222,7 +255,7 @@ def health_score(profile: dict) -> dict:
         n_columns,
         duplicate_rows,
         issue_columns,
-        _worst_missing(columns),
+        _worst_missing_all(profile, columns),
     )
     return {
         "score": score,

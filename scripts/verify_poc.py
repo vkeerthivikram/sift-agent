@@ -2,7 +2,7 @@
 
 Asserts the artifacts a client demo depends on: report.md, a self-contained
 report.html with embedded charts and a data-health panel, and profile.json
-carrying a 0-100 health score with grade — plus the agentic extensions: a
+carrying a 0-100 health score with grade â€” plus the agentic extensions: a
 populated agent trace, matching report sections, and an offline dataset Q&A
 answer. Prints POC-VERIFY-OK, then POC-AGENTIC-OK, on success.
 """
@@ -45,7 +45,7 @@ def main() -> int:
         assert profile_json.exists(), "profile.json missing"
         assert (out_dir / "charts").exists(), "charts/ missing"
 
-        profile = json.loads(profile_json.read_text())
+        profile = json.loads(profile_json.read_text(encoding="utf-8"))
         health = profile.get("health") or {}
         assert isinstance(health.get("score"), int), "health.score missing"
         assert 0 <= health["score"] <= 100, f"score out of range: {health['score']}"
@@ -53,12 +53,12 @@ def main() -> int:
         assert len(health.get("components") or []) == 4, "expected 4 components"
         assert health.get("verdict"), "verdict missing"
 
-        md = report.read_text()
+        md = report.read_text(encoding="utf-8")
         assert "## Executive summary" in md, "exec summary missing from report.md"
         assert "### Data health" in md, "health section missing from report.md"
         assert health["grade"] in md, "grade missing from report.md"
 
-        page = html.read_text()
+        page = html.read_text(encoding="utf-8")
         assert "data:image/png;base64" in page, "charts not embedded in report.html"
         assert 'src="charts/' not in page, "report.html references external charts"
         assert "Data health" in page, "health panel missing from report.html"

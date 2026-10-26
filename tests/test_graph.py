@@ -49,7 +49,9 @@ def test_offline_end_to_end(tmp_path, csv_path):
     assert not final.get("error")
     report = tmp_path / "out" / "report.md"
     assert report.exists()
-    profile = json.loads((tmp_path / "out" / "profile.json").read_text())
+    profile = json.loads(
+        (tmp_path / "out" / "profile.json").read_text(encoding="utf-8")
+    )
     assert profile["n_rows"] == 5
     assert profile["duplicate_rows"] == 1
     assert profile["columns"]["joined"]["type"] == "datetime"
@@ -61,7 +63,9 @@ def test_offline_end_to_end(tmp_path, csv_path):
 def test_offline_end_to_end_health_and_html(tmp_path, csv_path):
     final = _run(build_graph(None), csv_path, tmp_path / "out")
     assert not final.get("error")
-    profile = json.loads((tmp_path / "out" / "profile.json").read_text())
+    profile = json.loads(
+        (tmp_path / "out" / "profile.json").read_text(encoding="utf-8")
+    )
     health = profile["health"]
     assert 0 <= health["score"] <= 100
     assert health["grade"] in {"A", "B", "C", "D", "F"}
@@ -70,12 +74,12 @@ def test_offline_end_to_end_health_and_html(tmp_path, csv_path):
 
     html_path = Path(final["html_report_path"])
     assert html_path.exists()
-    page = html_path.read_text()
+    page = html_path.read_text(encoding="utf-8")
     assert "data:image/png;base64" in page
     assert 'src="charts/' not in page
     assert health["grade"] in page
 
-    report = (tmp_path / "out" / "report.md").read_text()
+    report = (tmp_path / "out" / "report.md").read_text(encoding="utf-8")
     assert "## Executive summary" in report
     assert "### Data health" in report
 
@@ -103,6 +107,24 @@ def test_row_guard(tmp_path, csv_path, monkeypatch):
     monkeypatch.setattr(graph_mod, "MAX_ROWS", 2)
     final = _run(build_graph(None), csv_path, tmp_path / "out")
     assert "maximum supported is" in final["error"]
+
+
+def test_datetime_inference_preserves_column_with_stray_value():
+    dates = [f"2024-01-{d:02d}" for d in range(1, 21)]
+    dates += ["2024-01-21", "not a date", "2024-01-23"]
+    df = pd.DataFrame({"d": dates})
+    out = graph_mod._infer_datetimes(df.copy())
+    assert not pd.api.types.is_datetime64_any_dtype(out["d"])
+    assert "not a date" in out["d"].tolist()
+
+
+def test_datetime_inference_handles_mixed_iso_formats():
+    df = pd.DataFrame(
+        {"d": ["2024-01-01", "2024-01-02T10:30:00", "2024-01-03 22:00:00"]}
+    )
+    out = graph_mod._infer_datetimes(df.copy())
+    assert pd.api.types.is_datetime64_any_dtype(out["d"])
+    assert int(out["d"].isna().sum()) == 0
 
 
 def test_llm_failure_falls_back_to_heuristics(tmp_path, csv_path, monkeypatch):
@@ -139,7 +161,7 @@ def test_chart_failure_recorded_as_warning(tmp_path, csv_path, monkeypatch):
     final = _run(build_graph(None), csv_path, tmp_path / "out")
     assert not final.get("error")
     assert any("correlation_heatmap" in w for w in final.get("warnings") or [])
-    report = (tmp_path / "out" / "report.md").read_text()
+    report = (tmp_path / "out" / "report.md").read_text(encoding="utf-8")
     assert "## Warnings" in report
     assert "correlation_heatmap" in report
 
@@ -154,7 +176,9 @@ def test_xlsx_end_to_end_multi_sheet(tmp_path):
         )
     final = _run(build_graph(None), p, tmp_path / "out")
     assert not final.get("error")
-    profile = json.loads((tmp_path / "out" / "profile.json").read_text())
+    profile = json.loads(
+        (tmp_path / "out" / "profile.json").read_text(encoding="utf-8")
+    )
     assert profile["n_rows"] == 4
     assert "sheet" in profile["columns"]
     assert any("combined 2 sheets" in w for w in final.get("warnings") or [])

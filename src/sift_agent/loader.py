@@ -60,15 +60,34 @@ def sheet_names(path: Path | BinaryIO, suffix: str | None = None) -> list[str]:
     return list(book.sheet_names)
 
 
+def _parse_sheet(book: pd.ExcelFile, name: str, nrows: int | None) -> pd.DataFrame:
+    """Parse one sheet, optionally capping materialized rows at ``nrows``."""
+    try:
+        return book.parse(name, nrows=nrows)
+    except TypeError:  # engine without nrows support
+        frame = book.parse(name)
+        return frame.head(nrows) if nrows is not None else frame
+
+
+def _budget_nrows(remaining: int) -> int | None:
+    """Rows to request so the caller can detect budget overflow (+1 sentinel)."""
+    return None if remaining is None else remaining + 1
+
+
 def load_table(
-    path: Path, sheet: str | int | None = None
+    path: Path,
+    sheet: str | int | None = None,
+    max_rows: int | None = None,
 ) -> tuple[pd.DataFrame, list[str]]:
     """Load ``path`` into a DataFrame.
 
     CSV files load as-is. Excel/ODS workbooks load the selected ``sheet``
-    (name or 0-based index); by default every non-empty sheet is combined
-    when the sheets share the same columns, and a ``sheet`` provenance
-    column records each row's origin.
+    (name or 0-based index) — and only that sheet; by default every
+    non-empty sheet is combined when the sheets share the same columns,
+    and a ``sheet`` provenance column records each row's origin.
+
+    ``max_rows`` bounds how many rows are materialized (one extra row is
+    read so callers can detect overflow: ``len(df) > max_rows``).
 
     Returns the DataFrame plus non-fatal warnings; raises LoadError otherwise.
     """
@@ -81,21 +100,37 @@ def load_table(
         )
     if suffix == ".csv":
         try:
-            return pd.read_csv(path), []
+            df = pd.read_csv(path, nrows=_budget_nrows(max_rows))
         except Exception as exc:
             raise LoadError(f"could not load '{path.name}': {exc}") from exc
+        return df, []
 
     try:
         book = pd.ExcelFile(path, engine=_excel_engine(suffix))
     except Exception as exc:
         raise LoadError(f"could not open '{path.name}' as spreadsheet: {exc}") from exc
 
+    if sheet is not None:
+        name = _resolve_sheet_name(book.sheet_names, sheet)
+        try:
+            frame = _parse_sheet(book, name, _budget_nrows(max_rows))
+        except Exception as exc:
+            raise LoadError(f"could not parse sheet '{name}': {exc}") from exc
+        if not (frame.shape[0] and frame.shape[1]):
+            raise LoadError(f"sheet '{name}' is empty")
+        return frame, []
+
     warnings: list[str] = []
     frames: dict[str, pd.DataFrame] = {}
+    remaining = max_rows
     for name in book.sheet_names:
-        frame = book.parse(name)
+        frame = _parse_sheet(book, name, _budget_nrows(remaining))
         if frame.shape[0] and frame.shape[1]:
             frames[name] = frame
+            if remaining is not None:
+                remaining -= len(frame)
+                if remaining < 0:
+                    break
         else:
             warnings.append(f"skipped empty sheet '{name}'")
 

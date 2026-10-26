@@ -322,3 +322,14 @@ def test_health_score_on_real_profile():
     dirty_result = health_score(profile_dataframe(dirty))
     assert dirty_result["score"] < result["score"]
     assert dirty_result["grade"] != "A"
+
+
+def test_health_score_counts_missing_beyond_profile_cap():
+    rng = np.random.default_rng(9)
+    df = pd.DataFrame(rng.normal(size=(10, 105)))
+    df["broken"] = np.nan  # column 106, fully missing, outside the detail cap
+    result = health_score(profile_dataframe(df))
+    comp = _component(result, "completeness")
+    assert "worst is `broken` at 100%" in comp["detail"]
+    assert "across 106 columns" in comp["detail"]
+    assert "`broken` at 100%" in result["verdict"]

@@ -72,3 +72,51 @@ def test_ask_messy_orders_correlation_offline():
     low = result.output.lower()
     assert "revenue" in low and "cost" in low
     assert "mode: offline" in result.output
+
+
+def test_ask_enforces_shared_size_guard(tmp_path, monkeypatch):
+    import sift_agent.cli as cli_mod
+
+    csv = _write_tiny_csv(tmp_path / "tiny.csv")
+    monkeypatch.setattr(cli_mod, "MAX_INPUT_BYTES", 5)
+    result = runner.invoke(app, ["ask", str(csv), "how many rows?"])
+    assert result.exit_code == 1
+    assert "maximum supported size" in result.output
+
+
+def test_ask_enforces_shared_row_guard(tmp_path, monkeypatch):
+    import sift_agent.cli as cli_mod
+
+    csv = _write_tiny_csv(tmp_path / "tiny.csv")
+    monkeypatch.setattr(cli_mod, "MAX_ROWS", 2)
+    result = runner.invoke(app, ["ask", str(csv), "how many rows?"])
+    assert result.exit_code == 1
+    assert "maximum supported" in result.output
+    assert "rows" in result.output
+
+
+def test_ask_rejects_unknown_timezone(tmp_path):
+    csv = _write_tiny_csv(tmp_path / "tiny.csv")
+    result = runner.invoke(
+        app, ["ask", str(csv), "how many rows?", "--tz", "Mars/Olympus"]
+    )
+    assert result.exit_code == 1
+    assert "unknown timezone" in result.output
+
+
+def test_ask_filtered_average_offline(tmp_path):
+    csv = _write_tiny_csv(tmp_path / "tiny.csv")
+    result = runner.invoke(
+        app, ["ask", str(csv), "what is the average amount for region EU?"]
+    )
+    assert result.exit_code == 0
+    assert "Result: 26" in result.output  # EU rows: 10, 42 -> mean 26
+
+
+def test_ask_grouped_sum_offline(tmp_path):
+    csv = _write_tiny_csv(tmp_path / "tiny.csv")
+    result = runner.invoke(app, ["ask", str(csv), "sum amount by region"])
+    assert result.exit_code == 0
+    assert "EU: 52" in result.output
+    assert "US: 50" in result.output
+    assert "APAC: 7" in result.output

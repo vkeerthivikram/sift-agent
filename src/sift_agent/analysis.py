@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 
 MAX_PROFILE_COLUMNS = 100
-MAX_QUALITY_COLUMNS = 200
 MAX_CRAMERS_COLUMNS = 12
 MAX_CRAMERS_CARDINALITY = 20
 MAX_CATEGORY_CARDINALITY = 20
@@ -303,13 +302,13 @@ def top_category_pairs(df: pd.DataFrame, limit: int = 8) -> list[dict]:
 
 
 def data_quality_checks(df: pd.DataFrame) -> list[dict]:
-    """Scan columns for common dirty-data patterns (capped at MAX_QUALITY_COLUMNS)."""
+    """Scan every column for common dirty-data patterns."""
     issues: list[dict] = []
 
     def add(check: str, column: str, detail: str) -> None:
         issues.append({"check": check, "column": column, "detail": detail})
 
-    for col in list(df.columns)[:MAX_QUALITY_COLUMNS]:
+    for col in df.columns:
         s = df[col]
         if pd.api.types.is_datetime64_any_dtype(s):
             continue
@@ -318,12 +317,12 @@ def data_quality_checks(df: pd.DataFrame) -> list[dict]:
             if sent:
                 add("numeric_sentinel", col, f"{sent} rows equal -999/-9999")
             continue
-        vals = s.dropna().astype(str).str.strip()
+        raw = s.dropna().astype(str)
+        vals = raw.str.strip()
         if vals.empty:
             continue
 
-        blank = vals == ""
-        padded = (vals != vals.str.strip()) | blank
+        padded = (raw != vals) | (vals == "")
         n_ws = int(padded.sum())
         if n_ws:
             add(
@@ -332,7 +331,7 @@ def data_quality_checks(df: pd.DataFrame) -> list[dict]:
                 f"{n_ws}/{len(vals)} values have stray or blank-only whitespace",
             )
 
-        nonblank = vals[~blank]
+        nonblank = vals[vals != ""]
         if len(nonblank) >= 2:
             parsed = pd.to_numeric(
                 nonblank.str.replace(",", "", regex=False), errors="coerce"
@@ -539,16 +538,17 @@ def profile_dataframe(df: pd.DataFrame, max_columns: int = MAX_PROFILE_COLUMNS) 
             info["value_counts"] = _top_values(s)
         columns[col] = info
 
-    missing = [
+    all_missing = [
         {
             "column": c,
-            "n_missing": columns[c]["n_missing"],
-            "pct_missing": columns[c]["pct_missing"],
+            "n_missing": int(df[c].isna().sum()),
+            "pct_missing": round(float(df[c].isna().mean() * 100), 2),
         }
-        for c in columns
-        if columns[c]["n_missing"] > 0
+        for c in df.columns
     ]
-    missing.sort(key=lambda m: m["pct_missing"], reverse=True)
+    all_missing = [m for m in all_missing if m["n_missing"] > 0]
+    all_missing.sort(key=lambda m: m["pct_missing"], reverse=True)
+    missing = all_missing[:10]
 
     outlier_columns = sorted(
         (
@@ -576,7 +576,8 @@ def profile_dataframe(df: pd.DataFrame, max_columns: int = MAX_PROFILE_COLUMNS) 
         "columns": columns,
         "sample_rows": sample_records(df),
         "constant_columns": [c for c in df.columns if n_unique[c] <= 1],
-        "top_missing": missing[:10],
+        "all_column_missing": all_missing,
+        "top_missing": missing,
         "top_correlated_pairs": top_correlations(df),
         "spearman_pairs": top_spearman_pairs(df),
         "cramers_v_pairs": top_cramers_v_pairs(df),

@@ -132,10 +132,10 @@ def test_offline_run_produces_trace_and_investigations(tmp_path, csv_path):
     assert finding["args"] == {}
     assert finding["summary"].startswith("- ")
 
-    report = (tmp_path / "out" / "report.md").read_text()
+    report = (tmp_path / "out" / "report.md").read_text(encoding="utf-8")
     assert "## Agent investigations" in report
     assert "## Anomaly drill-down" in report
-    page = Path(final["html_report_path"]).read_text()
+    page = Path(final["html_report_path"]).read_text(encoding="utf-8")
     assert "Agent investigations" in page
 
 
@@ -150,9 +150,9 @@ def test_offline_anomaly_reports_present(tmp_path, csv_path):
     assert isinstance(report["comparison"], str) and report["comparison"]
     assert isinstance(report["narrative"], str) and report["narrative"]
     assert len(reports) <= 2
-    markdown = (tmp_path / "out" / "report.md").read_text()
+    markdown = (tmp_path / "out" / "report.md").read_text(encoding="utf-8")
     assert "`amount`" in markdown
-    page = Path(final["html_report_path"]).read_text()
+    page = Path(final["html_report_path"]).read_text(encoding="utf-8")
     assert "Anomaly drill-down" in page
 
 
@@ -167,7 +167,7 @@ def test_tool_loop_llm_records_trace_and_findings(tmp_path, csv_path):
     outlier_entry = next(e for e in trace if e["tool"] == "outlier_inspect")
     assert "amount" in outlier_entry["summary"]
     assert final["investigations"][0]["summary"] == "- agent finding bullet"
-    markdown = (tmp_path / "out" / "report.md").read_text()
+    markdown = (tmp_path / "out" / "report.md").read_text(encoding="utf-8")
     assert "agent finding bullet" in markdown
 
 
@@ -199,9 +199,9 @@ def test_no_outliers_skips_drilldown_but_investigates(tmp_path, clean_path):
     final = _run(build_graph(None), clean_path, tmp_path / "out")
     assert not final.get("error")
     assert final["anomaly_reports"] == []
-    markdown = (tmp_path / "out" / "report.md").read_text()
+    markdown = (tmp_path / "out" / "report.md").read_text(encoding="utf-8")
     assert "## Anomaly drill-down" not in markdown
-    page = Path(final["html_report_path"]).read_text()
+    page = Path(final["html_report_path"]).read_text(encoding="utf-8")
     assert "Anomaly drill-down" not in page
     assert final["agent_trace"]
     assert final["investigations"]

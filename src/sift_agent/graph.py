@@ -145,7 +145,12 @@ def _charts_text(charts: list[dict]) -> str:
 
 
 def _infer_datetimes(df: pd.DataFrame) -> pd.DataFrame:
-    """Convert object columns whose values look like ISO dates/timestamps to datetime."""
+    """Convert object columns whose values look like ISO dates/timestamps to datetime.
+
+    Lossless: a column converts only when every non-null value parses as ISO
+    8601. Anything the conversion would erase (a stray value past the sample,
+    a mixed format) keeps the original column untouched.
+    """
     for col in df.columns:
         if not (df[col].dtype == object or pd.api.types.is_string_dtype(df[col])):
             continue
@@ -156,7 +161,10 @@ def _infer_datetimes(df: pd.DataFrame) -> pd.DataFrame:
             pd.to_datetime(sample, errors="raise", format="ISO8601")
         except (ValueError, TypeError):
             continue
-        df[col] = pd.to_datetime(df[col], errors="coerce")
+        converted = pd.to_datetime(df[col], errors="coerce", format="ISO8601")
+        if converted.isna().sum() > df[col].isna().sum():
+            continue
+        df[col] = converted
     return df
 
 
@@ -841,7 +849,9 @@ def build_graph(llm: BaseChatModel | None):
             }
         try:
             df, load_warnings = load_table(
-                Path(input_path), sheet=state.get("sheet") or None
+                Path(input_path),
+                sheet=state.get("sheet") or None,
+                max_rows=MAX_ROWS,
             )
         except LoadError as exc:
             return {"error": str(exc)}

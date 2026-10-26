@@ -216,3 +216,109 @@ def test_online_empty_llm_falls_back_offline(df, profile):
     assert result["offline"] is True
     assert "30 rows" in result["answer"]
     assert "ValueError" in result["warning"]
+
+
+# --- filtered / grouped query engine ---------------------------------------
+
+
+def test_offline_filtered_average_answers_155_not_230(df, profile):
+    q = "What is the average amount_usd for region EU?"
+    result = answer_question(q, df, profile)
+    assert result["offline"] is True
+    assert "155" in result["answer"]
+    assert "`region` = 'EU'" in result["answer"]
+    assert "column: amount_usd" in result["sources"]
+    assert "column: region" in result["sources"]
+
+
+def test_offline_grouped_sum_by_region(df, profile):
+    result = answer_question("sum amount_usd by region", df, profile)
+    assert result["offline"] is True
+    assert "EU: 1,860 (n=12)" in result["answer"]
+    assert "column: region" in result["sources"]
+
+
+def test_offline_where_clause_with_comparison(df, profile):
+    result = answer_question(
+        "count where region = EU and amount_usd > 150", df, profile
+    )
+    assert result["offline"] is True
+    assert "Result: 6" in result["answer"]  # EU amounts 160..210
+
+
+def test_offline_unparseable_filter_never_returns_unfiltered_stat(df, profile):
+    result = answer_question("average amount_usd for wobwob zzz 123", df, profile)
+    assert result["offline"] is True
+    assert result["answer"].startswith("Offline mode")
+    assert "`amount_usd`: average" not in result["answer"]
+
+
+def test_offline_determinism_with_filters(df, profile):
+    q = "What is the average amount_usd for region EU?"
+    assert answer_question(q, df, profile) == answer_question(q, df, profile)
+
+
+def test_exact_column_match_beats_partial_shared_word():
+    customers = pd.DataFrame(
+        {
+            "customer_id": ["a", "b", "c", "d"],
+            "customer_segment": ["retail", "vip", "retail", "vip"],
+        }
+    )
+    result = answer_question(
+        "What are the unique values of customer_id?",
+        customers,
+        profile_dataframe(customers),
+    )
+    assert result["offline"] is True
+    assert "`customer_id` has 4 unique values" in result["answer"]
+
+
+class _PlanLLM:
+    """Returns a canned JSON query plan regardless of the prompt."""
+
+    def __init__(self, plan):
+        import json
+
+        self.text = json.dumps(plan)
+
+    def invoke(self, messages):
+        return type("Response", (), {"content": self.text})()
+
+
+def test_online_llm_query_plan_executes_locally(df, profile):
+    plan = {
+        "aggregate": "mean",
+        "column": "amount_usd",
+        "filters": {"op": "=", "column": "region", "value": "EU"},
+        "group_by": None,
+    }
+    result = answer_question(
+        "what is the average amount_usd for region EU?",
+        df,
+        profile,
+        llm=_PlanLLM(plan),
+    )
+    assert result["offline"] is False
+    assert "155" in result["answer"]
+    assert result["query"] == plan
+    assert "column: region" in result["sources"]
+
+
+def test_online_llm_invalid_plan_falls_back_to_grounded_qa(df, profile):
+    result = answer_question(
+        "what is the average amount_usd for region EU?",
+        df,
+        profile,
+        llm=_CannedLLM("no braces at all"),
+    )
+    assert result["offline"] is False
+    assert result["answer"] == "no braces at all"
+
+
+def test_online_llm_failure_on_filtered_question_falls_back_offline(df, profile):
+    q = "what is the average amount_usd for region EU?"
+    result = answer_question(q, df, profile, llm=_BoomLLM())
+    assert result["offline"] is True
+    assert "155" in result["answer"]
+    assert "RuntimeError" in result["warning"]
